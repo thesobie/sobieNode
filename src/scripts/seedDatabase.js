@@ -19,7 +19,7 @@ const seedUsers = [
       preferredSalutation: 'Dr. Johnson'
     },
     userType: 'academic',
-    role: 'admin',
+    roles: ['admin'],
     affiliation: {
       organization: 'University of Business Excellence',
       college: 'College of Business',
@@ -146,7 +146,7 @@ const seedUsers = [
       preferredSalutation: 'Prof. Chen'
     },
     userType: 'academic',
-    role: 'reviewer',
+    roles: ['reviewer'],
     affiliation: {
       organization: 'State University',
       college: 'School of Business',
@@ -212,7 +212,7 @@ const seedUsers = [
     },
     userType: 'student',
     studentLevel: 'graduate',
-    role: 'user',
+    roles: ['user'],
     affiliation: {
       organization: 'Metropolitan University',
       college: 'Graduate School of Business',
@@ -306,7 +306,7 @@ const seedUsers = [
     },
     userType: 'student',
     studentLevel: 'undergraduate',
-    role: 'user',
+    roles: ['user'],
     affiliation: {
       organization: 'Liberal Arts College',
       college: 'School of Business',
@@ -368,7 +368,7 @@ const seedUsers = [
       preferredSalutation: 'David Park, CTO'
     },
     userType: 'other',
-    role: 'user',
+    roles: ['user'],
     affiliation: {
       organization: 'TechCorp Solutions',
       department: 'Information Technology',
@@ -458,7 +458,7 @@ const seedUsers = [
       preferredSalutation: 'Dr. Thompson, SOBIE President'
     },
     userType: 'academic',
-    role: 'president',
+    roles: ['president'],
     affiliation: {
       organization: 'SOBIE Organization',
       jobTitle: 'President and Senior Fellow'
@@ -554,7 +554,7 @@ const seedUsers = [
       preferredSalutation: 'Prof. Martinez, Conference Chair'
     },
     userType: 'academic',
-    role: 'conference-chairperson',
+    roles: ['conference-chairperson'],
     affiliation: {
       organization: 'Business Leadership University',
       college: 'School of Management',
@@ -607,6 +607,122 @@ const seedUsers = [
     isEmailVerified: true,
     lastLogin: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // 1 day ago
     profileCreatedDate: new Date(Date.now() - 2 * 365 * 24 * 60 * 60 * 1000) // 2 years ago
+  },
+
+  // Multi-role user example: Editor AND Conference Chairperson
+  {
+    email: 'sarah.wilson@sobieconference.org',
+    password: 'password123',
+    name: {
+      firstName: 'Sarah',
+      lastName: 'Wilson',
+      prefix: 'Dr.',
+      pronouns: 'she/her'
+    },
+    nametag: {
+      preferredSalutation: 'Dr. Sarah Wilson'
+    },
+    userType: 'academic',
+    roles: ['editor', 'conference-chairperson'], // Multiple roles!
+    affiliation: {
+      organization: 'Regional State University',
+      college: 'College of Business',
+      department: 'Information Systems',
+      jobTitle: 'Associate Professor and Department Chair'
+    },
+    contact: {
+      phones: [
+        { number: '+1-555-0199', type: 'work', primary: true }
+      ],
+      addresses: [
+        {
+          street: '789 University Blvd',
+          city: 'College Town',
+          state: 'State',
+          zipCode: '54321',
+          country: 'USA',
+          type: 'work',
+          primary: true
+        }
+      ],
+      orcid: '0000-0000-0000-0007'
+    },
+    profile: {
+      photo: 'https://example.com/photos/sarah-wilson.jpg',
+      bio: 'Dr. Sarah Wilson serves as both Editor of the SOBIE Journal and Conference Chairperson. She specializes in information systems research and conference organization.',
+      interests: ['Information Systems', 'Conference Management', 'Academic Publishing', 'Digital Transformation'],
+      expertiseAreas: ['Database Design', 'System Architecture', 'Research Methods', 'Event Planning'],
+      socialLinks: [
+        {
+          url: 'https://linkedin.com/in/sarahwilson',
+          title: 'LinkedIn Profile',
+          description: 'Professional networking and career updates',
+          category: 'social',
+          isPublic: true
+        },
+        {
+          url: 'https://scholar.google.com/sarahwilson',
+          title: 'Google Scholar',
+          description: 'Academic publications and citations',
+          category: 'academic',
+          isPublic: true
+        }
+      ]
+    },
+    preferences: {
+      newsletter: true,
+      communicationPreferences: {
+        email: true,
+        sms: false,
+        textMessagesOk: false,
+        emailCommunications: true,
+        newsletter: true
+      }
+    },
+    participationInterest: {
+      conferenceTrackChair: true,
+      panelParticipant: true,
+      moderator: true,
+      reviewer: true,
+      socialEventCoordinator: true,
+      editor: true,
+      conferenceChairperson: true,
+      presidentRole: false
+    },
+    privacySettings: {
+      name: true,
+      photo: true,
+      contactInfo: {
+        email: true,
+        phone: false,
+        address: false
+      },
+      bio: true,
+      socialLinks: true,
+      sobieHistory: {
+        attendance: true,
+        service: true,
+        publications: true
+      },
+      affiliation: true
+    },
+    sobieHistory: {
+      attendance: [
+        { year: 2023, role: 'conference chair', sessionsAttended: ['All Sessions'] },
+        { year: 2022, role: 'track chair', sessionsAttended: ['Information Systems Track'] }
+      ],
+      service: [
+        { year: 2023, role: 'conference chairperson', description: 'Organized annual SOBIE conference' },
+        { year: 2023, role: 'journal editor', description: 'Editor of SOBIE Journal' },
+        { year: 2022, role: 'track chair', description: 'Information Systems Track Chair' }
+      ],
+      publications: [
+        { year: 2023, title: 'Digital Transformation in Academic Conferences', type: 'paper', coAuthors: ['Dr. Mike Johnson'], abstract: 'Analysis of technology adoption in conference management.' }
+      ]
+    },
+    isEmailVerified: true,
+    lastLogin: new Date(Date.now() - 12 * 60 * 60 * 1000), // 12 hours ago
+    profileCreatedDate: new Date(Date.now() - 3 * 365 * 24 * 60 * 60 * 1000) // 3 years ago
   }
 ];
 
@@ -622,7 +738,7 @@ const seedDatabase = async () => {
     
     console.log(`✅ Successfully created ${users.length} users:`);
     users.forEach(user => {
-      console.log(`   - ${user.fullName} (${user.email}) - ${user.userType}${user.studentLevel ? `/${user.studentLevel}` : ''} - ${user.role}`);
+      console.log(`   - ${user.fullName} (${user.email}) - ${user.userType}${user.studentLevel ? `/${user.studentLevel}` : ''} - ${user.roles.join(', ')}`);
     });
     
     process.exit(0);

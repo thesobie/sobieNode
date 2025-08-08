@@ -13,6 +13,9 @@ class ContentModerator {
     this.profanityPatterns = [
       // Common profanity patterns - add more as needed
       /\b(damn|hell|crap|shit|fuck|bitch|ass|bastard)\b/gi,
+      // Profanity with common suffixes/variations
+      /\b(damn|hell|shit|fuck|bitch)\w*\b/gi,
+      /\b\w*fuck\w*\b/gi, // catch variations like "fucking", "fucked", etc.
       // Academic-inappropriate terms
       /\b(stupid|idiot|moron|dumb|retard)\b/gi,
       // Spam-like patterns

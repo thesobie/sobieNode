@@ -129,10 +129,17 @@ const userSchema = new mongoose.Schema({
       return this.userType === 'student';
     }
   },
-  role: {
-    type: String,
+  roles: {
+    type: [String],
     enum: ['user', 'reviewer', 'committee', 'admin', 'editor', 'conference-chairperson', 'president'],
-    default: 'user'
+    default: ['user'],
+    validate: {
+      validator: function(roles) {
+        // Ensure at least one role is assigned
+        return roles && roles.length > 0;
+      },
+      message: 'User must have at least one role assigned'
+    }
   },
 
   // Affiliation Information
@@ -512,6 +519,89 @@ userSchema.virtual('profile.socialLinks.displayCategory').get(function() {
   return this.category === 'other' && this.customCategory ? this.customCategory : this.category;
 });
 
+// Virtual methods for role checking
+userSchema.virtual('isAdmin').get(function() {
+  return this.roles && this.roles.includes('admin');
+});
+
+userSchema.virtual('isEditor').get(function() {
+  return this.roles && this.roles.includes('editor');
+});
+
+userSchema.virtual('isConferenceChairperson').get(function() {
+  return this.roles && this.roles.includes('conference-chairperson');
+});
+
+userSchema.virtual('isPresident').get(function() {
+  return this.roles && this.roles.includes('president');
+});
+
+userSchema.virtual('isReviewer').get(function() {
+  return this.roles && this.roles.includes('reviewer');
+});
+
+userSchema.virtual('isCommitteeMember').get(function() {
+  return this.roles && this.roles.includes('committee');
+});
+
+// Virtual for primary role (highest priority role for display purposes)
+userSchema.virtual('primaryRole').get(function() {
+  if (!this.roles || this.roles.length === 0) return 'user';
+  
+  // Priority order: president > admin > conference-chairperson > editor > committee > reviewer > user
+  const rolePriority = ['president', 'admin', 'conference-chairperson', 'editor', 'committee', 'reviewer', 'user'];
+  
+  for (const role of rolePriority) {
+    if (this.roles.includes(role)) {
+      return role;
+    }
+  }
+  
+  return this.roles[0]; // fallback to first role
+});
+
+// Instance method to check if user has specific role
+userSchema.methods.hasRole = function(role) {
+  return this.roles && this.roles.includes(role);
+};
+
+// Instance method to add role
+userSchema.methods.addRole = function(role) {
+  if (!this.roles) this.roles = [];
+  if (!this.roles.includes(role)) {
+    this.roles.push(role);
+  }
+  return this;
+};
+
+// Instance method to remove role
+userSchema.methods.removeRole = function(role) {
+  if (!this.roles) return this;
+  this.roles = this.roles.filter(r => r !== role);
+  // Ensure at least 'user' role remains
+  if (this.roles.length === 0) {
+    this.roles = ['user'];
+  }
+  return this;
+};
+
+// Instance method to get role display names
+userSchema.methods.getRoleDisplayNames = function() {
+  if (!this.roles) return ['User'];
+  
+  const roleDisplayMap = {
+    'user': 'User',
+    'reviewer': 'Reviewer',
+    'committee': 'Committee Member',
+    'admin': 'Administrator',
+    'editor': 'Editor',
+    'conference-chairperson': 'Conference Chairperson',
+    'president': 'President'
+  };
+  
+  return this.roles.map(role => roleDisplayMap[role] || role);
+};
+
 // Pre-save middleware to ensure only one primary phone/address
 userSchema.pre('save', function(next) {
   // Content moderation checks
@@ -706,20 +796,85 @@ userSchema.pre('save', function(next) {
   next();
 });
 
-// Pre-save middleware to hash password (you'll implement this when adding JWT)
-// userSchema.pre('save', async function(next) {
-//   if (!this.isModified('password')) return next();
-//   
-//   const bcrypt = require('bcryptjs');
-//   this.password = await bcrypt.hash(this.password, 12);
-//   next();
-// });
+// Pre-save middleware to hash password
+userSchema.pre('save', async function(next) {
+  if (!this.isModified('password')) return next();
+  
+  const bcrypt = require('bcryptjs');
+  this.password = await bcrypt.hash(this.password, 12);
+  next();
+});
 
-// Instance method to check password (for future JWT implementation)
-// userSchema.methods.comparePassword = async function(candidatePassword) {
-//   const bcrypt = require('bcryptjs');
-//   return await bcrypt.compare(candidatePassword, this.password);
-// };
+// Instance method to check password
+userSchema.methods.comparePassword = async function(candidatePassword) {
+  const bcrypt = require('bcryptjs');
+  return await bcrypt.compare(candidatePassword, this.password);
+};
+
+// Instance method to generate JWT token
+userSchema.methods.generateAuthToken = function() {
+  const jwt = require('jsonwebtoken');
+  const payload = {
+    id: this._id,
+    email: this.email,
+    roles: this.roles,
+    primaryRole: this.primaryRole
+  };
+  
+  return jwt.sign(payload, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRE || '7d'
+  });
+};
+
+// Instance method to generate magic link token
+userSchema.methods.generateMagicLinkToken = function() {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  // Hash token and set to field
+  this.magicLinkToken = crypto.createHash('sha256').update(token).digest('hex');
+  
+  // Set expire time (10 minutes)
+  this.magicLinkExpires = Date.now() + 10 * 60 * 1000;
+  
+  return token;
+};
+
+// Instance method to generate email verification token
+userSchema.methods.generateEmailVerificationToken = function() {
+  const crypto = require('crypto');
+  const token = crypto.randomBytes(32).toString('hex');
+  
+  // Hash token and set to field
+  this.emailVerificationToken = crypto.createHash('sha256').update(token).digest('hex');
+  
+  // Set expire time (24 hours)
+  this.emailVerificationExpires = Date.now() + 24 * 60 * 60 * 1000;
+  
+  return token;
+};
+
+// Static method to find user by magic link token
+userSchema.statics.findByMagicLinkToken = function(token) {
+  const crypto = require('crypto');
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  
+  return this.findOne({
+    magicLinkToken: hashedToken,
+    magicLinkExpires: { $gt: Date.now() }
+  });
+};
+
+// Static method to find user by email verification token
+userSchema.statics.findByEmailVerificationToken = function(token) {
+  const crypto = require('crypto');
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+  
+  return this.findOne({
+    emailVerificationToken: hashedToken,
+    emailVerificationExpires: { $gt: Date.now() }
+  });
+};
 
 // Method to increment login attempts
 userSchema.methods.incLoginAttempts = function() {
