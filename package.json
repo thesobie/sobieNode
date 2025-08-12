@@ -13,7 +13,11 @@
     "lint:fix": "eslint src/ --fix",
     "seed": "node src/scripts/seedDatabase.js",
     "auth:demo": "node scripts/demo/demo-auth-flows.js",
-    "auth:test": "node scripts/auth/test-full-auth-flow.js"
+    "auth:test": "node scripts/auth/test-full-auth-flow.js",
+    "test:safety": "node tests/safety/test-communication-safety.js",
+    "test:unit": "npm test",
+    "test:all": "npm run test:safety && npm run test:unit",
+    "organize": "node organize-project.js"
   },
   "repository": {
     "type": "git",
@@ -51,6 +55,7 @@
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",
     "pdf-parse": "^1.1.1",
+    "pdfkit": "^0.17.1",
     "sharp": "^0.34.3",
     "twilio": "^5.8.0",
     "uuid": "^11.1.0"

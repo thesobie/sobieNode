@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const accountRecoveryController = require('../controllers/accountRecoveryController');
 const { authMiddleware, requireEmailVerification } = require('../middleware/auth');
-const { validationMiddleware: validate } = require('../middleware/validation');
+const { validate } = require('../middleware/validation');
 const { body } = require('express-validator');
 
 // Public routes (no authentication required)
