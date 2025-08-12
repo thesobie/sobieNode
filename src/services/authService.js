@@ -159,6 +159,14 @@ class AuthService {
       email: email.toLowerCase()
     });
 
+    // Automatically link any existing submissions with this email
+    try {
+      await newUser.linkExistingSubmissions();
+    } catch (error) {
+      console.error('Failed to link existing submissions for new user:', error);
+      // Don't fail registration if linking fails
+    }
+
     // Send email verification
     const verificationToken = newUser.generateEmailVerificationToken();
     await newUser.save();
@@ -309,9 +317,15 @@ class AuthService {
       throw new Error('Account is inactive');
     }
 
-    // Validate password
-    if (!newPassword || newPassword.length < 6) {
-      throw new Error('Password must be at least 6 characters long');
+    // Validate password using the same criteria as the User model
+    if (!newPassword || newPassword.length < 8) {
+      throw new Error('Password must be at least 8 characters long');
+    }
+
+    // Check password strength requirements
+    const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!strongPassword.test(newPassword)) {
+      throw new Error('Password must contain at least 8 characters with: 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character (@$!%*?&)');
     }
 
     // Update password and clear tokens
@@ -320,7 +334,19 @@ class AuthService {
     user.magicLinkExpires = undefined;
     user.loginAttempts = 0;
     user.lockUntil = undefined;
-    await user.save();
+    
+    try {
+      await user.save();
+    } catch (saveError) {
+      // If there's a validation error during save, throw a clearer message
+      if (saveError.name === 'ValidationError') {
+        const passwordError = saveError.errors.password;
+        if (passwordError) {
+          throw new Error(passwordError.message);
+        }
+      }
+      throw saveError;
+    }
 
     return {
       message: 'Password reset successful'

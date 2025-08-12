@@ -38,7 +38,15 @@ src/
 ├── utils/            # Utility functions
 └── server.js         # Main server file
 
-__tests__/            # Test files
+__tests__/            # Organized test files
+├── auth/             # Authentication tests
+├── content/          # Content moderation tests
+├── demo/             # Demo and example scripts
+└── README.md         # Test documentation
+
+docs/                 # Project documentation
+├── authentication/   # Authentication documentation
+└── USER_DATA_STRUCTURE.md
 ```
 
 ## Quick Start

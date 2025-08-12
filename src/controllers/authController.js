@@ -59,7 +59,8 @@ const requestMagicLink = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/magic-login
 // @access  Public
 const magicLogin = asyncHandler(async (req, res) => {
-  const { token } = req.body;
+  // Token can come from either body (POST) or query (GET)
+  const { token } = req.body.token ? req.body : req.query;
 
   if (!token) {
     return res.status(400).json({
@@ -142,7 +143,8 @@ const refreshToken = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/verify-email
 // @access  Public
 const verifyEmail = asyncHandler(async (req, res) => {
-  const { token } = req.body;
+  // Token can come from either body (POST) or query (GET)
+  const { token } = req.body.token ? req.body : req.query;
 
   if (!token) {
     return res.status(400).json({
@@ -211,6 +213,151 @@ const forgotPassword = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/reset-password
 // @access  Public
 const resetPassword = asyncHandler(async (req, res) => {
+  // For GET requests (email links), token comes from query, no password yet
+  if (req.method === 'GET') {
+    const { token } = req.query;
+    if (!token) {
+      return res.status(400).send(`
+        <!DOCTYPE html>
+        <html>
+        <head><title>SOBIE - Error</title></head>
+        <body style="font-family: Arial, sans-serif; text-align: center; margin: 50px;">
+          <h2>Error: Reset token is required</h2>
+          <p>This link appears to be invalid or incomplete.</p>
+        </body>
+        </html>
+      `);
+    }
+    
+    // Return a simple HTML form for password reset
+    return res.send(`
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <title>SOBIE - Reset Password</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+          body { 
+            font-family: Arial, sans-serif; 
+            max-width: 400px; 
+            margin: 50px auto; 
+            padding: 20px;
+            background-color: #f5f5f5;
+          }
+          .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+          }
+          h2 { color: #333; text-align: center; margin-bottom: 20px; }
+          .requirements {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 15px;
+            margin-bottom: 20px;
+          }
+          .requirements p {
+            margin: 0 0 10px 0;
+            font-weight: bold;
+            color: #495057;
+          }
+          .requirements ul {
+            margin: 0;
+            padding-left: 20px;
+          }
+          .requirements li {
+            color: #6c757d;
+            font-size: 14px;
+            margin-bottom: 5px;
+          }
+          input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            box-sizing: border-box;
+          }
+          button { 
+            background: #007cba; 
+            color: white; 
+            padding: 12px 20px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            width: 100%;
+            font-size: 16px;
+          }
+          button:hover { background: #005a8b; }
+          .message { text-align: center; margin-top: 20px; }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h2>Reset Your Password</h2>
+          <div class="requirements">
+            <p><strong>Password Requirements:</strong></p>
+            <ul>
+              <li>At least 8 characters</li>
+              <li>1 uppercase letter (A-Z)</li>
+              <li>1 lowercase letter (a-z)</li>
+              <li>1 number (0-9)</li>
+              <li>1 special character (@$!%*?&)</li>
+            </ul>
+          </div>
+          <form id="resetForm">
+            <input type="hidden" id="token" value="${token}">
+            <input type="password" id="password" placeholder="Enter your new password" required minlength="8" 
+                   pattern="^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$"
+                   title="Password must contain at least 8 characters with: 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character (@$!%*?&)">
+            <button type="submit">Reset Password</button>
+          </form>
+          <div id="message" class="message"></div>
+        </div>
+        
+        <script>
+          document.getElementById('resetForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const token = document.getElementById('token').value;
+            const password = document.getElementById('password').value;
+            const messageDiv = document.getElementById('message');
+            
+            // Show loading message
+            messageDiv.innerHTML = '<p style="color: blue;">⏳ Resetting password...</p>';
+            
+            try {
+              const response = await fetch('/api/auth/reset-password', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ token, password })
+              });
+              
+              const result = await response.json();
+              
+              if (result.success) {
+                messageDiv.innerHTML = '<p style="color: green;">✅ Password reset successful! You can now log in with your new password.</p>';
+                document.getElementById('resetForm').style.display = 'none';
+              } else {
+                messageDiv.innerHTML = '<p style="color: red;">❌ ' + (result.message || 'Password reset failed') + '</p>';
+              }
+            } catch (error) {
+              console.error('Reset password error:', error);
+              messageDiv.innerHTML = '<p style="color: red;">❌ An error occurred. Please try again. If the problem persists, please contact support.</p>';
+            }
+          });
+        </script>
+      </body>
+      </html>
+    `);
+  }
+
+  // For POST requests, handle the actual password reset
   const { token, password } = req.body;
 
   if (!token || !password) {
@@ -220,12 +367,19 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
   }
 
-  const result = await authService.resetPassword(token, password);
-  
-  res.status(200).json({
-    success: true,
-    message: result.message
-  });
+  try {
+    const result = await authService.resetPassword(token, password);
+    
+    res.status(200).json({
+      success: true,
+      message: result.message
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message || 'Password reset failed'
+    });
+  }
 });
 
 // @desc    Change password (authenticated user)

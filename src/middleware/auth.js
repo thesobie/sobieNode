@@ -157,6 +157,9 @@ const requireEditor = requireRole('admin', 'editor');
 // Conference chairperson, admin, or editor middleware
 const requireConferenceRole = requireRole('admin', 'editor', 'conference-chairperson');
 
+// Activity coordinator or admin middleware
+const requireActivityCoordinator = requireRole('admin', 'activity-coordinator');
+
 module.exports = {
   authMiddleware,
   optionalAuthMiddleware,
@@ -164,5 +167,6 @@ module.exports = {
   requireEmailVerification,
   requireAdmin,
   requireEditor,
-  requireConferenceRole
+  requireConferenceRole,
+  requireActivityCoordinator
 };

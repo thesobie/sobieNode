@@ -49,7 +49,7 @@ describe('User Routes', () => {
   test('POST /api/users should create a new user', async () => {
     const newUser = {
       email: 'newtest@example.com',
-      password: 'testpassword123',
+      password: 'CatCat123!',
       name: {
         firstName: 'Test',
         lastName: 'User'

@@ -26,7 +26,20 @@ const userSchema = new mongoose.Schema({
     required: function() {
       return !this.magicLinkEnabled;
     },
-    minlength: [6, 'Password must be at least 6 characters'],
+    minlength: [8, 'Password must be at least 8 characters'],
+    validate: {
+      validator: function(password) {
+        // Skip validation if password is already hashed (during user updates)
+        if (password && password.startsWith('$2b$')) {
+          return true;
+        }
+        
+        // Password strength requirements
+        const strongPassword = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return strongPassword.test(password);
+      },
+      message: 'Password must contain at least 8 characters with: 1 uppercase letter, 1 lowercase letter, 1 number, and 1 special character (@$!%*?&)'
+    },
     select: false // Don't include password in queries by default
   },
   magicLinkEnabled: {
@@ -131,7 +144,7 @@ const userSchema = new mongoose.Schema({
   },
   roles: {
     type: [String],
-    enum: ['user', 'reviewer', 'committee', 'admin', 'editor', 'conference-chairperson', 'president'],
+    enum: ['user', 'reviewer', 'committee', 'admin', 'editor', 'conference-chairperson', 'president', 'activity-coordinator'],
     default: ['user'],
     validate: {
       validator: function(roles) {
@@ -415,6 +428,22 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  isHistoricalData: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  historicalDataSource: {
+    type: String,
+    enum: ['conference_papers', 'presentation_records', 'committee_lists', 'registration_data', 'manual_import', 'other'],
+    required: function() {
+      return this.isHistoricalData;
+    }
+  },
+  historicalDataNotes: {
+    type: String,
+    maxlength: [500, 'Historical data notes cannot exceed 500 characters']
+  },
   isEmailVerified: {
     type: Boolean,
     default: false
@@ -544,12 +573,16 @@ userSchema.virtual('isCommitteeMember').get(function() {
   return this.roles && this.roles.includes('committee');
 });
 
+userSchema.virtual('isActivityCoordinator').get(function() {
+  return this.roles && this.roles.includes('activity-coordinator');
+});
+
 // Virtual for primary role (highest priority role for display purposes)
 userSchema.virtual('primaryRole').get(function() {
   if (!this.roles || this.roles.length === 0) return 'user';
   
-  // Priority order: president > admin > conference-chairperson > editor > committee > reviewer > user
-  const rolePriority = ['president', 'admin', 'conference-chairperson', 'editor', 'committee', 'reviewer', 'user'];
+  // Priority order: president > admin > conference-chairperson > editor > committee > reviewer > activity-coordinator > user
+  const rolePriority = ['president', 'admin', 'conference-chairperson', 'editor', 'committee', 'reviewer', 'activity-coordinator', 'user'];
   
   for (const role of rolePriority) {
     if (this.roles.includes(role)) {
@@ -596,7 +629,8 @@ userSchema.methods.getRoleDisplayNames = function() {
     'admin': 'Administrator',
     'editor': 'Editor',
     'conference-chairperson': 'Conference Chairperson',
-    'president': 'President'
+    'president': 'President',
+    'activity-coordinator': 'Activity Coordinator'
   };
   
   return this.roles.map(role => roleDisplayMap[role] || role);
@@ -1055,6 +1089,160 @@ userSchema.methods.toJSON = function() {
   delete userObject.lockUntil;
   delete userObject.__v;
   return userObject;
+};
+
+// Get user's research submissions (as author or co-author)
+userSchema.methods.getResearchSubmissions = function(status = null) {
+  const ResearchSubmission = mongoose.model('ResearchSubmission');
+  return ResearchSubmission.getByUser(this._id, status);
+};
+
+// Get user's research submission statistics
+userSchema.methods.getSubmissionStats = async function() {
+  const ResearchSubmission = mongoose.model('ResearchSubmission');
+  
+  const [allSubmissions, published, underReview, drafts] = await Promise.all([
+    ResearchSubmission.getByUser(this._id),
+    ResearchSubmission.getByUser(this._id, 'accepted'),
+    ResearchSubmission.getByUser(this._id, 'under_review'),
+    ResearchSubmission.getByUser(this._id, 'draft')
+  ]);
+  
+  // Count roles in submissions
+  let asCorrespondingAuthor = 0;
+  let asCoAuthor = 0;
+  let asFacultyAdvisor = 0;
+  
+  for (const submission of allSubmissions) {
+    // Check if user is corresponding author
+    if (submission.correspondingAuthor.userId && 
+        submission.correspondingAuthor.userId.toString() === this._id.toString()) {
+      asCorrespondingAuthor++;
+    }
+    
+    // Check if user is co-author
+    const coAuthorEntry = submission.coAuthors.find(author => 
+      author.userId && author.userId.toString() === this._id.toString()
+    );
+    if (coAuthorEntry) {
+      asCoAuthor++;
+    }
+    
+    // Check if user is faculty advisor/sponsor
+    if (submission.facultySponsors && submission.facultySponsors.length > 0) {
+      const facultyEntry = submission.facultySponsors.find(sponsor =>
+        sponsor.userId && sponsor.userId.toString() === this._id.toString()
+      );
+      if (facultyEntry) {
+        asFacultyAdvisor++;
+      }
+    }
+  }
+  
+  return {
+    total: allSubmissions.length,
+    published: published.length,
+    underReview: underReview.length,
+    drafts: drafts.length,
+    roles: {
+      correspondingAuthor: asCorrespondingAuthor,
+      coAuthor: asCoAuthor,
+      facultyAdvisor: asFacultyAdvisor
+    },
+    // Additional useful stats
+    yearsActive: [...new Set(allSubmissions.map(s => s.conferenceYear))].sort(),
+    collaborators: this.getCollaboratorCount(allSubmissions)
+  };
+};
+
+// Helper method to count unique collaborators
+userSchema.methods.getCollaboratorCount = function(submissions) {
+  const collaboratorEmails = new Set();
+  
+  for (const submission of submissions) {
+    // Add corresponding author if not this user
+    if (submission.correspondingAuthor.email && 
+        submission.correspondingAuthor.email.toLowerCase() !== this.email.toLowerCase()) {
+      collaboratorEmails.add(submission.correspondingAuthor.email.toLowerCase());
+    }
+    
+    // Add co-authors if not this user
+    for (const coAuthor of submission.coAuthors) {
+      if (coAuthor.email && 
+          coAuthor.email.toLowerCase() !== this.email.toLowerCase()) {
+        collaboratorEmails.add(coAuthor.email.toLowerCase());
+      }
+    }
+  }
+  
+  return collaboratorEmails.size;
+};
+
+// Link existing submissions to newly created user account
+userSchema.methods.linkExistingSubmissions = async function() {
+  const ResearchSubmission = mongoose.model('ResearchSubmission');
+  
+  console.log(`🔗 Linking existing submissions for new user: ${this.email}`);
+  
+  // Find submissions where this email appears as a co-author but without userId
+  const submissionsToUpdate = await ResearchSubmission.find({
+    $and: [
+      {
+        $or: [
+          { 'coAuthors.email': { $regex: new RegExp(`^${this.email}$`, 'i') } },
+          { 'facultySponsors.email': { $regex: new RegExp(`^${this.email}$`, 'i') } }
+        ]
+      },
+      {
+        $or: [
+          { 'coAuthors.userId': { $exists: false } },
+          { 'coAuthors.userId': null },
+          { 'facultySponsors.userId': { $exists: false } },
+          { 'facultySponsors.userId': null }
+        ]
+      }
+    ]
+  });
+  
+  let updatedCount = 0;
+  
+  for (const submission of submissionsToUpdate) {
+    let submissionUpdated = false;
+    
+    // Update co-authors
+    for (const coAuthor of submission.coAuthors) {
+      if (coAuthor.email && 
+          coAuthor.email.toLowerCase() === this.email.toLowerCase() && 
+          !coAuthor.userId) {
+        coAuthor.userId = this._id;
+        submissionUpdated = true;
+        console.log(`  📝 Linked co-author in submission ${submission.submissionNumber}`);
+      }
+    }
+    
+    // Update faculty sponsors
+    if (submission.facultySponsors) {
+      for (const sponsor of submission.facultySponsors) {
+        if (sponsor.email && 
+            sponsor.email.toLowerCase() === this.email.toLowerCase() && 
+            !sponsor.userId) {
+          sponsor.userId = this._id;
+          submissionUpdated = true;
+          console.log(`  👨‍🎓 Linked faculty sponsor in submission ${submission.submissionNumber}`);
+        }
+      }
+    }
+    
+    // Add to associated users if linked
+    if (submissionUpdated) {
+      submission.addAssociatedUser(this._id, 'coauthor');
+      await submission.save();
+      updatedCount++;
+    }
+  }
+  
+  console.log(`✅ Linked ${updatedCount} existing submissions to user ${this.email}`);
+  return updatedCount;
 };
 
 module.exports = mongoose.model('User', userSchema);

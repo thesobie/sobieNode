@@ -1,9 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
+const { authMiddleware } = require('../middleware/auth');
 
 // GET /api/users
 router.get('/', userController.getAllUsers);
+
+// GET /api/users/me/submissions - Must come before /:id routes
+router.get('/me/submissions', authMiddleware, userController.getMySubmissions);
+
+// GET /api/users/me/stats - Must come before /:id routes  
+router.get('/me/stats', authMiddleware, userController.getMyStats);
 
 // GET /api/users/:id/public
 router.get('/:id/public', userController.getUserPublicProfile);

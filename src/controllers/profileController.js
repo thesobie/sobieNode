@@ -1,4 +1,5 @@
 const userService = require('../services/userService');
+const photoUploadService = require('../services/photoUploadService');
 const { asyncHandler } = require('../utils/asyncHandler');
 const { authMiddleware, requireEmailVerification } = require('../middleware/auth');
 const mongoose = require('mongoose');
@@ -23,7 +24,11 @@ const updateMyProfile = asyncHandler(async (req, res) => {
   const userId = req.user._id;
   
   // Prevent updating sensitive fields
-  const restrictedFields = ['_id', 'email', 'password', 'roles', 'isActive', 'isEmailVerified', 'loginAttempts', 'lockUntil', 'magicLinkToken', 'emailVerificationToken'];
+  const restrictedFields = [
+    '_id', 'email', 'password', 'roles', 'isActive', 'isEmailVerified', 
+    'loginAttempts', 'lockUntil', 'magicLinkToken', 'emailVerificationToken',
+    'createdAt', 'updatedAt', '__v'
+  ];
   
   const updateData = { ...req.body };
   restrictedFields.forEach(field => delete updateData[field]);
@@ -44,6 +49,30 @@ const updateMyProfile = asyncHandler(async (req, res) => {
     data: {
       user: updatedUser
     }
+  });
+});
+
+// @desc    Get current user's profile summary
+// @route   GET /api/profile/me/summary
+// @access  Private
+const getMyProfileSummary = asyncHandler(async (req, res) => {
+  const user = req.user;
+  
+  const summary = {
+    id: user._id,
+    name: user.fullName,
+    email: user.email,
+    organization: user.affiliation.organization,
+    userType: user.userType,
+    isEmailVerified: user.isEmailVerified,
+    profileCompleteness: calculateProfileCompleteness(user),
+    lastLogin: user.lastLogin,
+    memberSince: user.createdAt
+  };
+
+  res.status(200).json({
+    success: true,
+    data: summary
   });
 });
 
@@ -107,29 +136,173 @@ const updatePrivacySettings = asyncHandler(async (req, res) => {
 // @route   POST /api/profile/me/photo
 // @access  Private
 const uploadProfilePhoto = asyncHandler(async (req, res) => {
-  // TODO: Implement file upload with multer and cloud storage
-  // For now, accept photo URL in request body
-  const { photoUrl } = req.body;
+  const userId = req.user._id;
   
-  if (!photoUrl) {
+  // Validate uploaded file
+  if (!req.file) {
     return res.status(400).json({
       success: false,
-      message: 'Photo URL is required'
+      message: 'No photo file provided. Please select an image file to upload.'
     });
   }
-  
-  const userId = req.user._id;
-  const updatedUser = await userService.updateUser(userId, {
-    'profile.photo': photoUrl
-  });
-  
-  res.status(200).json({
-    success: true,
-    message: 'Profile photo updated successfully',
-    data: {
-      photoUrl: updatedUser.profile.photo
+
+  // Validate image file
+  const validationErrors = photoUploadService.validateImageFile(req.file);
+  if (validationErrors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid image file',
+      errors: validationErrors
+    });
+  }
+
+  try {
+    // Get image metadata
+    const metadata = await photoUploadService.getImageMetadata(req.file.buffer);
+    
+    // Check image dimensions (optional minimum size check)
+    if (metadata.width < 100 || metadata.height < 100) {
+      return res.status(400).json({
+        success: false,
+        message: 'Image is too small. Minimum size: 100x100 pixels'
+      });
     }
-  });
+
+    // Delete existing photo if user has one
+    const currentUser = await userService.getUserById(userId);
+    if (currentUser.profile?.photo) {
+      try {
+        // Parse existing photo data to extract storage info for deletion
+        let existingPhotoData;
+        if (typeof currentUser.profile.photo === 'string') {
+          // Legacy URL-only format
+          existingPhotoData = { url: currentUser.profile.photo };
+        } else if (typeof currentUser.profile.photo === 'object') {
+          existingPhotoData = currentUser.profile.photo;
+        }
+        
+        if (existingPhotoData) {
+          await photoUploadService.deletePhoto(existingPhotoData);
+        }
+      } catch (deleteError) {
+        console.error('Error deleting previous photo:', deleteError);
+        // Continue with upload even if deletion fails
+      }
+    }
+
+    // Upload new photo
+    const uploadResult = await photoUploadService.uploadPhoto(
+      req.file.buffer,
+      req.file.originalname,
+      userId.toString()
+    );
+
+    // Prepare photo data for database
+    const photoData = {
+      url: uploadResult.url,
+      sizes: uploadResult.sizes || {},
+      metadata: {
+        originalFilename: uploadResult.originalFilename,
+        uploadedAt: uploadResult.uploadedAt,
+        storageType: uploadResult.storageType,
+        dimensions: {
+          width: metadata.width,
+          height: metadata.height
+        },
+        format: metadata.format,
+        fileSize: req.file.size
+      }
+    };
+
+    // Add storage-specific data
+    if (uploadResult.key) photoData.key = uploadResult.key; // S3
+    if (uploadResult.publicId) photoData.publicId = uploadResult.publicId; // Cloudinary
+    if (uploadResult.path) photoData.path = uploadResult.path; // Local
+    if (uploadResult.filename) photoData.filename = uploadResult.filename; // Local
+    if (uploadResult.bucket) photoData.bucket = uploadResult.bucket; // S3
+
+    // Update user profile with new photo
+    const updatedUser = await userService.updateUser(userId, {
+      'profile.photo': photoData
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Profile photo uploaded successfully',
+      data: {
+        photo: {
+          url: photoData.url,
+          sizes: photoData.sizes,
+          metadata: {
+            dimensions: photoData.metadata.dimensions,
+            format: photoData.metadata.format,
+            uploadedAt: photoData.metadata.uploadedAt
+          }
+        }
+      }
+    });
+  } catch (error) {
+    console.error('Photo upload error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to upload photo',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
+});
+
+// @desc    Remove profile photo
+// @route   DELETE /api/profile/me/photo
+// @access  Private
+const removeProfilePhoto = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  
+  try {
+    // Get current user to access photo data
+    const currentUser = await userService.getUserById(userId);
+    
+    if (!currentUser.profile?.photo) {
+      return res.status(404).json({
+        success: false,
+        message: 'No profile photo found to remove'
+      });
+    }
+
+    // Delete photo from storage
+    try {
+      let photoData;
+      if (typeof currentUser.profile.photo === 'string') {
+        // Legacy URL-only format
+        photoData = { url: currentUser.profile.photo };
+      } else if (typeof currentUser.profile.photo === 'object') {
+        photoData = currentUser.profile.photo;
+      }
+      
+      if (photoData) {
+        await photoUploadService.deletePhoto(photoData);
+      }
+    } catch (deleteError) {
+      console.error('Error deleting photo from storage:', deleteError);
+      // Continue with database removal even if storage deletion fails
+    }
+
+    // Remove photo from user profile
+    const updatedUser = await userService.updateUser(userId, {
+      $unset: { 'profile.photo': 1 }
+    });
+    
+    res.status(200).json({
+      success: true,
+      message: 'Profile photo removed successfully'
+    });
+  } catch (error) {
+    console.error('Photo removal error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to remove photo',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Internal server error'
+    });
+  }
 });
 
 // @desc    Get nametag information
@@ -217,7 +390,7 @@ const searchProfiles = asyncHandler(async (req, res) => {
   
   const [users, totalCount] = await Promise.all([
     User.find(filter)
-      .select('name affiliation userType studentLevel contact roles privacySettings')
+      .select('name affiliation userType studentLevel contact roles privacySettings profile')
       .limit(limitNum)
       .skip(skipNum)
       .sort({ 'name.lastName': 1, 'name.firstName': 1 }),
@@ -341,13 +514,117 @@ const getConferenceStats = asyncHandler(async (req, res) => {
 // @access  Private
 const getMySobieHistory = asyncHandler(async (req, res) => {
   const user = req.user;
+  const userId = req.user._id;
   
+  // Get linked research presentations
+  const ResearchPresentation = require('../models/ResearchPresentation');
+  const presentations = await ResearchPresentation.find({
+    'authors.userId': userId
+  })
+    .populate('conferenceId', 'name year location')
+    .populate('sessionId', 'title track')
+    .sort({ conferenceYear: -1 });
+
+  // Format presentations with user's role
+  const presentationsWithRole = presentations.map(presentation => {
+    const userAuthor = presentation.authors.find(author => 
+      author.userId && author.userId.toString() === userId.toString()
+    );
+    
+    return {
+      _id: presentation._id,
+      title: presentation.title,
+      discipline: presentation.discipline,
+      presentationType: presentation.presentationType,
+      year: presentation.conferenceYear,
+      conference: presentation.conferenceId,
+      session: presentation.sessionId,
+      userRole: userAuthor ? {
+        role: userAuthor.role,
+        isPresenter: userAuthor.isPresenter,
+        isStudentAuthor: userAuthor.isStudentAuthor,
+        order: userAuthor.order
+      } : null,
+      status: presentation.status,
+      awards: presentation.awards || []
+    };
+  });
+
+  // Group presentations by year
+  const presentationsByYear = presentationsWithRole.reduce((acc, presentation) => {
+    const year = presentation.year;
+    if (!acc[year]) acc[year] = [];
+    acc[year].push(presentation);
+    return acc;
+  }, {});
+
+  // Get manual SOBIE history
+  const manualHistory = {
+    attendance: user.sobieHistory?.attendance || [],
+    service: user.sobieHistory?.service || [],
+    publications: user.sobieHistory?.publications || []
+  };
+
+  // Calculate comprehensive statistics
+  const stats = {
+    totalPresentations: presentationsWithRole.length,
+    totalAttendance: manualHistory.attendance.length,
+    totalService: manualHistory.service.length,
+    totalManualPublications: manualHistory.publications.length,
+    yearsActive: [
+      ...new Set([
+        ...presentationsWithRole.map(p => p.year),
+        ...manualHistory.attendance.map(a => a.year),
+        ...manualHistory.service.map(s => s.year),
+        ...manualHistory.publications.map(p => p.year)
+      ])
+    ].sort((a, b) => b - a),
+    primaryAuthorCount: presentationsWithRole.filter(p => 
+      p.userRole?.role === 'primary_author'
+    ).length,
+    presenterCount: presentationsWithRole.filter(p => 
+      p.userRole?.isPresenter
+    ).length,
+    studentResearchCount: presentationsWithRole.filter(p => 
+      p.userRole?.isStudentAuthor
+    ).length,
+    disciplinesPresented: [...new Set(presentationsWithRole.map(p => p.discipline))],
+    rolesHeld: [
+      ...new Set([
+        ...presentationsWithRole.map(p => p.userRole?.role).filter(Boolean),
+        ...manualHistory.service.map(s => s.role),
+        ...manualHistory.attendance.map(a => a.role)
+      ])
+    ],
+    awardsReceived: presentationsWithRole.flatMap(p => p.awards)
+  };
+
   res.status(200).json({
     success: true,
     data: {
-      attendance: user.sobieHistory.attendance || [],
-      service: user.sobieHistory.service || [],
-      publications: user.sobieHistory.publications || []
+      // Linked research presentations
+      researchPresentations: {
+        total: presentationsWithRole.length,
+        byYear: presentationsByYear,
+        list: presentationsWithRole
+      },
+      
+      // Manual SOBIE history entries
+      manualHistory,
+      
+      // Comprehensive statistics
+      statistics: stats,
+      
+      // Summary for quick display
+      summary: {
+        totalContributions: stats.totalPresentations + stats.totalService + stats.totalAttendance,
+        yearsActive: stats.yearsActive.length,
+        firstYear: stats.yearsActive[stats.yearsActive.length - 1] || null,
+        mostRecentYear: stats.yearsActive[0] || null,
+        primaryRoles: stats.rolesHeld.slice(0, 3),
+        mainDisciplines: stats.disciplinesPresented.slice(0, 3),
+        hasAwards: stats.awardsReceived.length > 0
+      }
     }
   });
 });
@@ -377,6 +654,43 @@ const updateMySobieHistory = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Add single item to SOBIE history
+// @route   POST /api/profile/me/sobie-history/:type
+// @access  Private
+const addSobieHistoryItem = asyncHandler(async (req, res) => {
+  const userId = req.user._id;
+  const { type } = req.params; // attendance, service, or publications
+  const itemData = req.body;
+  
+  if (!['attendance', 'service', 'publications'].includes(type)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Invalid SOBIE history type. Must be: attendance, service, or publications'
+    });
+  }
+  
+  const user = await userService.getUserById(userId);
+  if (!user.sobieHistory) {
+    user.sobieHistory = { attendance: [], service: [], publications: [] };
+  }
+  
+  if (!user.sobieHistory[type]) {
+    user.sobieHistory[type] = [];
+  }
+  
+  user.sobieHistory[type].push(itemData);
+  await user.save();
+  
+  res.status(201).json({
+    success: true,
+    message: `${type} item added successfully`,
+    data: {
+      item: itemData,
+      [type]: user.sobieHistory[type]
+    }
+  });
+});
+
 // @desc    Run content moderation check on profile
 // @route   POST /api/profile/me/content-check
 // @access  Private
@@ -398,16 +712,150 @@ const runContentModerationCheck = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get photo upload configuration and status
+// @route   GET /api/profile/me/photo/config
+// @access  Private
+const getPhotoUploadConfig = asyncHandler(async (req, res) => {
+  const config = photoUploadService.checkStorageConfig();
+  
+  res.status(200).json({
+    success: true,
+    data: {
+      maxFileSize: config.maxFileSize,
+      maxFileSizeMB: Math.round(config.maxFileSize / 1024 / 1024),
+      supportedFormats: config.supportedFormats,
+      storageType: config.storageType,
+      configured: config.configured,
+      errors: config.errors.length > 0 ? config.errors : undefined,
+      imageSizes: photoUploadService.IMAGE_SIZES,
+      currentPhoto: req.user.profile?.photo || null
+    }
+  });
+});
+
+// @desc    Get profile completeness status
+// @route   GET /api/profile/me/completeness
+// @access  Private
+const getProfileCompleteness = asyncHandler(async (req, res) => {
+  const user = req.user;
+  const completeness = calculateProfileCompleteness(user);
+  
+  res.status(200).json({
+    success: true,
+    data: completeness
+  });
+});
+
+// Helper function to calculate profile completeness
+const calculateProfileCompleteness = (user) => {
+  const fields = {
+    basicInfo: {
+      weight: 30,
+      fields: ['name.firstName', 'name.lastName', 'affiliation.organization'],
+      completed: 0
+    },
+    contact: {
+      weight: 20,
+      fields: ['email'],
+      completed: 0
+    },
+    professional: {
+      weight: 25,
+      fields: ['userType', 'affiliation.jobTitle', 'affiliation.department'],
+      completed: 0
+    },
+    profile: {
+      weight: 15,
+      fields: ['profile.bio', 'profile.interests'],
+      completed: 0
+    },
+    verification: {
+      weight: 10,
+      fields: ['isEmailVerified'],
+      completed: 0
+    }
+  };
+
+  let totalScore = 0;
+  const recommendations = [];
+
+  // Check basic info
+  const basicFields = ['name.firstName', 'name.lastName', 'affiliation.organization'];
+  fields.basicInfo.completed = basicFields.filter(field => {
+    const value = field.split('.').reduce((obj, key) => obj?.[key], user);
+    return value && value.toString().trim() !== '';
+  }).length;
+  
+  if (fields.basicInfo.completed < basicFields.length) {
+    recommendations.push('Complete your basic information (name and organization)');
+  }
+
+  // Check contact
+  fields.contact.completed = user.email ? 1 : 0;
+
+  // Check professional info
+  const professionalFields = ['userType', 'affiliation.jobTitle', 'affiliation.department'];
+  fields.professional.completed = professionalFields.filter(field => {
+    const value = field.split('.').reduce((obj, key) => obj?.[key], user);
+    return value && value.toString().trim() !== '';
+  }).length;
+  
+  if (!user.affiliation?.jobTitle) {
+    recommendations.push('Add your job title');
+  }
+  if (!user.affiliation?.department) {
+    recommendations.push('Add your department');
+  }
+
+  // Check profile details
+  const profileFields = ['profile.bio', 'profile.interests'];
+  let profileCompleted = 0;
+  if (user.profile?.bio && user.profile.bio.trim() !== '') profileCompleted++;
+  if (user.profile?.interests && user.profile.interests.length > 0) profileCompleted++;
+  fields.profile.completed = profileCompleted;
+  
+  if (!user.profile?.bio) {
+    recommendations.push('Add a professional bio');
+  }
+  if (!user.profile?.interests || user.profile.interests.length === 0) {
+    recommendations.push('Add your areas of interest');
+  }
+
+  // Check verification
+  fields.verification.completed = user.isEmailVerified ? 1 : 0;
+  if (!user.isEmailVerified) {
+    recommendations.push('Verify your email address');
+  }
+
+  // Calculate weighted score
+  Object.values(fields).forEach(category => {
+    const categoryScore = (category.completed / category.fields.length) * category.weight;
+    totalScore += categoryScore;
+  });
+
+  return {
+    overall: Math.round(totalScore),
+    categories: fields,
+    recommendations,
+    isComplete: totalScore >= 80
+  };
+};
+
 module.exports = {
   getMyProfile,
+  getMyProfileSummary,
   updateMyProfile,
   getPublicProfile,
   updatePrivacySettings,
   uploadProfilePhoto,
+  removeProfilePhoto,
+  getPhotoUploadConfig,
   getNametagInfo,
   searchProfiles,
   getConferenceStats,
   getMySobieHistory,
   updateMySobieHistory,
-  runContentModerationCheck
+  addSobieHistoryItem,
+  runContentModerationCheck,
+  getProfileCompleteness
 };

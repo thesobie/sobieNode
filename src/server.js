@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
@@ -82,6 +83,21 @@ app.use(generalLimiter);
 app.use(cookieParser()); // Parse cookies
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+
+// Serve uploaded files statically (with appropriate caching)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads'), {
+  maxAge: '1y', // Cache for 1 year
+  etag: true,
+  lastModified: true,
+  setHeaders: (res, path) => {
+    // Add security headers for uploaded files
+    res.set('X-Content-Type-Options', 'nosniff');
+    // Prevent direct execution of uploaded files
+    if (path.endsWith('.js') || path.endsWith('.html') || path.endsWith('.php')) {
+      res.set('Content-Type', 'text/plain');
+    }
+  }
+}));
 
 // Apply stricter rate limiting to auth routes
 app.use('/api/auth/login', authLimiter);
