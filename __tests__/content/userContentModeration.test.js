@@ -4,7 +4,12 @@ const connectDB = require('../../src/config/database');
 
 describe('User Content Moderation Integration', () => {
   beforeAll(async () => {
-    await connectDB();
+    try {
+      await connectDB();
+    } catch (err) {
+      console.error('Test DB connection failed:', err);
+      throw err;
+    }
   });
 
   afterAll(async () => {

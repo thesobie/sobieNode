@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const logger = require('../config/logger');
 const { 
   emailSafetyGuard, 
   safeEmailSender, 
@@ -27,22 +28,28 @@ class SafeEmailService {
           pass: process.env.SMTP_PASS
         }
       });
-      console.log('✅ Email service initialized for PRODUCTION');
+      logger.info('Email service initialized for production', {
+        host: process.env.SMTP_HOST,
+        port: process.env.SMTP_PORT,
+        user: process.env.SMTP_USER ? 'configured' : 'missing'
+      });
     } else {
       // Mock transporter for development
       this.transporter = {
         sendMail: async (mailOptions) => {
-          console.log('📧 MOCK EMAIL SERVICE - Email blocked in development');
-          console.log('   To:', mailOptions.to);
-          console.log('   Subject:', mailOptions.subject);
-          console.log('   Content length:', mailOptions.html?.length || mailOptions.text?.length || 0);
+          logger.info('Mock email service - development mode', {
+            to: mailOptions.to,
+            subject: mailOptions.subject,
+            contentLength: mailOptions.html?.length || mailOptions.text?.length || 0,
+            type: 'mock_email'
+          });
           return {
             messageId: 'mock-dev-' + Date.now(),
             response: 'Mock email - development mode'
           };
         }
       };
-      console.log('🛡️  Email service initialized for DEVELOPMENT (mock mode)');
+      logger.info('Email service initialized for development (mock mode)');
     }
   }
 
@@ -221,10 +228,23 @@ class SafeEmailService {
           <ul>
             <li>Watch for pre-conference materials and schedules</li>
             <li>Connect with other attendees through our networking platform</li>
-            <li>Book travel and accommodations if attending in person</li>
+            <li><strong>📧 Check your email for San Destin Resort information and discount codes</strong></li>
             <li>Submit research presentations (optional)</li>
             <li>Download the conference mobile app when available</li>
           </ul>
+        </div>
+        
+        <div style="background: #fef3c7; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;">
+          <h4 style="margin-top: 0; color: #d97706;">🏖️ Accommodation at Sandestin Resort</h4>
+          <p>SOBIE ${new Date(registration.conference.startDate).getFullYear()} will be held at the beautiful <strong>Sandestin Golf and Beach Resort</strong> in Miramar Beach, Florida.</p>
+          <p><strong>Special Benefits for Attendees:</strong></p>
+          <ul>
+            <li>🎟️ Exclusive group rate discount codes</li>
+            <li>🏨 Multiple accommodation options (hotel, condos, vacation rentals)</li>
+            <li>🌊 Full resort amenities including beach access and golf</li>
+            <li>🚌 Convenient shuttle service within the resort</li>
+          </ul>
+          <p><strong>Resort booking information with your discount codes will be sent in a separate email shortly.</strong></p>
         </div>
         
         <p style="color: #6b7280; font-size: 14px;">
@@ -305,12 +325,20 @@ class SafeEmailService {
       const safetyCheck = emailSafetyGuard(toEmail, subject, htmlContent);
 
       if (safetyCheck.blocked) {
-        console.log(`🚫 EMAIL BLOCKED (${emailType}): ${toEmail}`);
-        console.log(`   Subject: ${subject}`);
+        logger.info('Email blocked in development mode', {
+          emailType,
+          recipient: toEmail,
+          subject: subject,
+          blocked: true,
+          reason: 'development_safety_guard'
+        });
         
         // In development, optionally log to file or console
         if (process.env.LOG_COMMUNICATION_ATTEMPTS === 'true') {
-          console.log(`📝 Email content would have been sent to: ${toEmail}`);
+          logger.debug('Email content logging enabled', {
+            recipient: toEmail,
+            emailType
+          });
         }
 
         return {
@@ -332,9 +360,12 @@ class SafeEmailService {
 
       const result = await this.transporter.sendMail(mailOptions);
       
-      console.log(`✅ EMAIL SENT (${emailType}): ${safetyCheck.safeEmail.to}`);
-      console.log(`   Subject: ${safetyCheck.safeEmail.subject}`);
-      console.log(`   Message ID: ${result.messageId}`);
+      logger.info('Email sent successfully', {
+        emailType,
+        recipient: safetyCheck.safeEmail.to,
+        subject: safetyCheck.safeEmail.subject,
+        messageId: result.messageId
+      });
 
       return {
         success: true,
@@ -345,7 +376,12 @@ class SafeEmailService {
       };
 
     } catch (error) {
-      console.error(`❌ EMAIL ERROR (${emailType}):`, error);
+      logger.error('Email sending failed', {
+        emailType,
+        recipient: toEmail,
+        error: error.message,
+        stack: error.stack
+      });
       
       return {
         success: false,
@@ -360,10 +396,12 @@ class SafeEmailService {
    * Test email functionality with safety checks
    */
   async testEmailService() {
-    console.log('🧪 Testing Email Service...');
-    console.log(`   Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`   Development Mode: ${DEVELOPMENT_MODE}`);
-    console.log(`   Test Email: ${process.env.TEST_USER_EMAIL}`);
+    logger.info('Testing email service', {
+      environment: process.env.NODE_ENV || 'development',
+      developmentMode: DEVELOPMENT_MODE,
+      testEmail: process.env.TEST_USER_EMAIL,
+      service: 'email_test'
+    });
 
     const testResult = await this.sendSafeEmail(
       process.env.TEST_USER_EMAIL || 'test@example.com',
@@ -372,7 +410,10 @@ class SafeEmailService {
       'test'
     );
 
-    console.log('🧪 Test Result:', testResult);
+    logger.info('Email service test completed', {
+      testResult,
+      service: 'email_test'
+    });
     return testResult;
   }
 
@@ -979,6 +1020,143 @@ class SafeEmailService {
         </html>
       `,
       'review_reminder'
+    );
+  }
+
+  /**
+   * Send resort information email with discount codes
+   */
+  async sendResortInformationEmail(emailData) {
+    const { user, conference, venue, discountCodes, registration } = emailData;
+
+    const discountCodesHtml = discountCodes.map(code => `
+      <div class="discount-card" style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 8px; padding: 20px; margin: 15px 0;">
+        <h4 style="margin: 0 0 10px 0; color: #007bff;">${code.code}</h4>
+        <p style="margin: 5px 0; font-weight: bold;">${code.description}</p>
+        <p style="margin: 5px 0; color: #28a745;">${code.discount}</p>
+        <p style="margin: 5px 0; font-size: 14px;"><strong>Valid:</strong> ${new Date(code.validFrom).toLocaleDateString()} - ${new Date(code.validUntil).toLocaleDateString()}</p>
+        <div style="margin-top: 10px;">
+          <p style="margin: 3px 0; font-size: 13px; color: #6c757d;"><strong>Instructions:</strong> ${code.bookingInstructions}</p>
+          ${code.terms.map(term => `<p style="margin: 2px 0; font-size: 12px; color: #6c757d;">• ${term}</p>`).join('')}
+        </div>
+      </div>
+    `).join('');
+
+    const amenitiesHtml = venue.amenities.map(amenity => 
+      `<li style="margin: 5px 0;">${amenity}</li>`
+    ).join('');
+
+    const accommodationTypesHtml = venue.accommodationTypes.map(type => `
+      <div style="margin: 15px 0;">
+        <h4 style="margin: 0 0 5px 0; color: #007bff;">${type.type}</h4>
+        <p style="margin: 5px 0;">${type.description}</p>
+        <ul style="margin: 5px 0; padding-left: 20px;">
+          ${type.features.map(feature => `<li style="font-size: 14px;">${feature}</li>`).join('')}
+        </ul>
+      </div>
+    `).join('');
+
+    return await this.sendSafeEmail(
+      user.email,
+      `SOBIE ${conference.year} - San Destin Resort Information & Discount Codes`,
+      `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
+            .container { max-width: 700px; margin: 0 auto; padding: 20px; }
+            .header { background: linear-gradient(135deg, #007bff, #0056b3); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+            .content { background-color: #ffffff; padding: 30px; border: 1px solid #dee2e6; }
+            .venue-info { background-color: #f8f9fa; border-radius: 8px; padding: 20px; margin: 20px 0; }
+            .booking-info { background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin: 20px 0; }
+            .urgent { background-color: #fff3cd; border: 1px solid #ffeaa7; border-radius: 8px; padding: 15px; margin: 20px 0; }
+            .footer { text-align: center; color: #6b7280; font-size: 14px; margin-top: 30px; border-top: 1px solid #dee2e6; padding-top: 20px; }
+            .button { display: inline-block; background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; margin: 10px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <h1>🏖️ SOBIE ${conference.year}</h1>
+              <h2>San Destin Resort Information</h2>
+            </div>
+            <div class="content">
+              <p>Dear ${user.name.first} ${user.name.last},</p>
+              
+              <p>Welcome to SOBIE ${conference.year}! We're excited to have you join us at the beautiful <strong>Sandestin Golf and Beach Resort</strong>.</p>
+              
+              <div class="urgent">
+                <h3>🎟️ Your Exclusive Discount Codes</h3>
+                <p>As a confirmed attendee, you have access to special resort rates:</p>
+                ${discountCodesHtml}
+              </div>
+              
+              <div class="venue-info">
+                <h3>🏨 About Sandestin Golf and Beach Resort</h3>
+                <p><strong>Address:</strong> ${venue.location.address}, ${venue.location.city}, ${venue.location.state} ${venue.location.zipCode}</p>
+                <p>${venue.description}</p>
+                
+                <h4>🌟 Resort Amenities</h4>
+                <ul>
+                  ${amenitiesHtml}
+                </ul>
+                
+                <h4>🏠 Accommodation Options</h4>
+                ${accommodationTypesHtml}
+              </div>
+              
+              <div class="booking-info">
+                <h3>📞 How to Book</h3>
+                <p><strong>Website:</strong> <a href="${venue.bookingInfo.reservationWebsite}">${venue.bookingInfo.reservationWebsite}</a></p>
+                <p><strong>Phone:</strong> ${venue.bookingInfo.reservationPhone}</p>
+                <p><strong>Group Code:</strong> <span style="background-color: #007bff; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold;">${venue.bookingInfo.groupCode}</span></p>
+                <p><strong>Important:</strong> ${venue.bookingInfo.bookingInstructions}</p>
+              </div>
+              
+              <div class="venue-info">
+                <h3>✈️ Transportation Information</h3>
+                <p><strong>Airport:</strong> ${venue.transportationInfo.airport}</p>
+                <p><strong>Shuttle Service:</strong> ${venue.transportationInfo.shuttleService}</p>
+                <p><strong>Parking:</strong> ${venue.transportationInfo.parking}</p>
+                <p><strong>Local Transportation:</strong> ${venue.transportationInfo.localTransportation}</p>
+              </div>
+              
+              <div class="venue-info">
+                <h3>📅 Conference Venues</h3>
+                <ul>
+                  ${venue.conferenceVenues.map(venueLocation => `<li>${venueLocation}</li>`).join('')}
+                </ul>
+              </div>
+              
+              <div class="urgent">
+                <h3>⏰ Important Deadlines</h3>
+                <p><strong>Group Rate Deadline:</strong> Book by this date to secure discounted rates</p>
+                <p><strong>Cancellation Policy:</strong> Review resort policies before booking</p>
+                <p><strong>Conference Dates:</strong> ${new Date(conference.startDate).toLocaleDateString()} - ${new Date(conference.endDate).toLocaleDateString()}</p>
+              </div>
+              
+              <h3>🤔 Accommodation Preference</h3>
+              <p>We'd love to know your accommodation plans to help with conference logistics!</p>
+              <a href="#" class="button">Update Your Accommodation Preference</a>
+              
+              <p style="margin-top: 30px;">If you have any questions about the resort or need assistance with booking, please don't hesitate to contact our conference team.</p>
+              
+              <p>We look forward to seeing you at SOBIE ${conference.year}!</p>
+              
+              <p>Best regards,<br>
+              The SOBIE ${conference.year} Conference Team</p>
+            </div>
+            <div class="footer">
+              <p>SOBIE ${conference.year} Conference | ${venue.name}</p>
+              <p>This email was sent to ${user.email} as a confirmed conference attendee.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      'resort_information'
     );
   }
 }

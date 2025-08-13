@@ -1,4 +1,4 @@
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const mongoose = require('mongoose');
 const ResearchSubmission = require('../models/ResearchSubmission');
 const User = require('../models/User');
@@ -10,7 +10,7 @@ const fs = require('fs');
 // @desc    Get proceedings dashboard for admins
 // @route   GET /api/admin/proceedings
 // @access  Private (Admin only)
-const getProceedingsDashboard = asyncHandler(async (req, res) => {
+const getProceedingsDashboard = catchAsync(async (req, res) => {
   const { status, year, page = 1, limit = 20 } = req.query;
   
   // Build query
@@ -67,7 +67,7 @@ const getProceedingsDashboard = asyncHandler(async (req, res) => {
 // @desc    Invite presentation to submit to proceedings
 // @route   POST /api/admin/proceedings/:id/invite
 // @access  Private (Admin only)
-const inviteToProceedings = asyncHandler(async (req, res) => {
+const inviteToProceedings = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { deadline, customMessage } = req.body;
   const adminId = req.user.id;
@@ -145,7 +145,7 @@ const inviteToProceedings = asyncHandler(async (req, res) => {
 // @desc    Respond to proceedings invitation (accept/decline)
 // @route   POST /api/proceedings/:id/respond
 // @access  Private
-const respondToInvitation = asyncHandler(async (req, res) => {
+const respondToInvitation = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { accepted, comments } = req.body;
   const userId = req.user.id;
@@ -228,7 +228,7 @@ const respondToInvitation = asyncHandler(async (req, res) => {
 // @desc    Submit final paper for proceedings
 // @route   POST /api/proceedings/:id/submit
 // @access  Private
-const submitProceedingsPaper = asyncHandler(async (req, res) => {
+const submitProceedingsPaper = catchAsync(async (req, res) => {
   const { id } = req.params;
   const userId = req.user.id;
   
@@ -321,7 +321,7 @@ const submitProceedingsPaper = asyncHandler(async (req, res) => {
 // @desc    Get user's proceedings status and submissions
 // @route   GET /api/proceedings/me
 // @access  Private
-const getMyProceedings = asyncHandler(async (req, res) => {
+const getMyProceedings = catchAsync(async (req, res) => {
   const userId = req.user.id;
   
   const submissions = await ResearchSubmission.find({
@@ -382,7 +382,7 @@ const getMyProceedings = asyncHandler(async (req, res) => {
 // @desc    Assign editor for proceedings review
 // @route   POST /api/admin/proceedings/:id/assign-editor
 // @access  Private (Admin only)
-const assignProceedingsEditor = asyncHandler(async (req, res) => {
+const assignProceedingsEditor = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { editorId } = req.body;
   const adminId = req.user.id;

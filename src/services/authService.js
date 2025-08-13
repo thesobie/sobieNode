@@ -2,6 +2,7 @@ const User = require('../models/User');
 const userService = require('./userService');
 const jwtService = require('./jwtService');
 const notificationService = require('./notificationService');
+const logger = require('../config/logger');
 const crypto = require('crypto');
 
 class AuthService {
@@ -163,7 +164,12 @@ class AuthService {
     try {
       await newUser.linkExistingSubmissions();
     } catch (error) {
-      console.error('Failed to link existing submissions for new user:', error);
+      logger.error('Failed to link existing submissions for new user', { 
+        email: userData.email, 
+        error: error.message,
+        service: 'AuthService',
+        method: 'registerUser'
+      });
       // Don't fail registration if linking fails
     }
 
@@ -178,7 +184,12 @@ class AuthService {
         newUser.name.firstName
       );
     } catch (error) {
-      console.error('Failed to send verification email:', error);
+      logger.error('Failed to send verification email', { 
+        email: newUser.email, 
+        error: error.message,
+        service: 'AuthService',
+        method: 'registerUser'
+      });
       // Don't fail registration if email sending fails
     }
 
@@ -399,7 +410,12 @@ class AuthService {
   // Log failed login attempt for non-existent users
   async logFailedAttempt(email) {
     // You might want to implement rate limiting here
-    console.log(`Failed login attempt for email: ${email} at ${new Date()}`);
+    logger.warn('Failed login attempt', { 
+      email, 
+      timestamp: new Date().toISOString(),
+      service: 'AuthService',
+      method: 'logFailedAttempt'
+    });
   }
 
   // Validate session/token

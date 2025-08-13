@@ -2,12 +2,12 @@ const ResearchSubmission = require('../models/ResearchSubmission');
 const User = require('../models/User');
 const Conference = require('../models/Conference');
 const emailService = require('../services/emailService');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 
 // @desc    Get all submissions for admin dashboard
 // @route   GET /api/admin/research-submissions
 // @access  Private/Admin
-const getAllSubmissions = asyncHandler(async (req, res) => {
+const getAllSubmissions = catchAsync(async (req, res) => {
   const { status, conferenceYear, discipline, page = 1, limit = 20 } = req.query;
 
   // Build query
@@ -82,7 +82,7 @@ const getAllSubmissions = asyncHandler(async (req, res) => {
 // @desc    Assign editor to submission
 // @route   POST /api/admin/research-submissions/:id/assign-editor
 // @access  Private/Admin
-const assignEditor = asyncHandler(async (req, res) => {
+const assignEditor = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const { editorId, notes } = req.body;
   const adminId = req.user._id;
@@ -188,7 +188,7 @@ const assignEditor = asyncHandler(async (req, res) => {
 // @desc    Assign reviewers to submission
 // @route   POST /api/admin/research-submissions/:id/assign-reviewers
 // @access  Private/Admin or Editor
-const assignReviewers = asyncHandler(async (req, res) => {
+const assignReviewers = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const { reviewerIds, reviewDeadline } = req.body;
   const userId = req.user._id;
@@ -359,7 +359,7 @@ const assignReviewers = asyncHandler(async (req, res) => {
 // @desc    Make final decision on submission
 // @route   POST /api/admin/research-submissions/:id/make-decision
 // @access  Private/Admin or Editor
-const makeFinalDecision = asyncHandler(async (req, res) => {
+const makeFinalDecision = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const { decision, editorComments } = req.body;
   const userId = req.user._id;
@@ -467,7 +467,7 @@ const makeFinalDecision = asyncHandler(async (req, res) => {
 // @desc    Get potential reviewers for a submission
 // @route   GET /api/admin/research-submissions/:id/potential-reviewers
 // @access  Private/Admin or Editor
-const getPotentialReviewers = asyncHandler(async (req, res) => {
+const getPotentialReviewers = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
 
@@ -567,7 +567,7 @@ const getPotentialReviewers = asyncHandler(async (req, res) => {
 // @desc    Send reminder to reviewers
 // @route   POST /api/admin/research-submissions/:id/send-reminders
 // @access  Private/Admin or Editor
-const sendReviewerReminders = asyncHandler(async (req, res) => {
+const sendReviewerReminders = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const { reviewerIds } = req.body; // Optional: specific reviewers, otherwise all pending
   const userId = req.user._id;
@@ -665,7 +665,7 @@ const sendReviewerReminders = asyncHandler(async (req, res) => {
 // @desc    Get submission statistics for admin dashboard
 // @route   GET /api/admin/research-submissions/statistics
 // @access  Private/Admin
-const getSubmissionStatistics = asyncHandler(async (req, res) => {
+const getSubmissionStatistics = catchAsync(async (req, res) => {
   const { year } = req.query;
 
   const matchStage = year ? { conferenceYear: parseInt(year) } : {};
@@ -772,7 +772,7 @@ const getSubmissionStatistics = asyncHandler(async (req, res) => {
 // @desc    Get presenter availability overview for conference scheduling
 // @route   GET /api/admin/research-submissions/presenter-availability
 // @access  Private/Admin
-const getPresenterAvailabilityOverview = asyncHandler(async (req, res) => {
+const getPresenterAvailabilityOverview = catchAsync(async (req, res) => {
   const { conferenceYear } = req.query;
   
   if (!conferenceYear) {
@@ -887,7 +887,7 @@ const getPresenterAvailabilityOverview = asyncHandler(async (req, res) => {
 // @desc    Get detailed presenter conflicts for specific day/time
 // @route   GET /api/admin/research-submissions/conflicts/:day/:period
 // @access  Private/Admin
-const getConflictsForTimeSlot = asyncHandler(async (req, res) => {
+const getConflictsForTimeSlot = catchAsync(async (req, res) => {
   const { day, period } = req.params;
   const { conferenceYear } = req.query;
 

@@ -9,15 +9,14 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
+    "test:unit": "jest --testPathPattern=__tests__",
+    "test:integration": "jest --testPathPattern=integration",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
     "seed": "node src/scripts/seedDatabase.js",
-    "auth:demo": "node scripts/demo/demo-auth-flows.js",
-    "auth:test": "node scripts/auth/test-full-auth-flow.js",
-    "test:safety": "node tests/safety/test-communication-safety.js",
-    "test:unit": "npm test",
-    "test:all": "npm run test:safety && npm run test:unit",
-    "organize": "node organize-project.js"
+    "test:core": "node __tests__/core/test-quick-core.js",
+    "test:comprehensive": "node __tests__/test-runners/run-comprehensive-tests.js",
+    "validate:env": "node scripts/validate-environment.js"
   },
   "repository": {
     "type": "git",
@@ -38,6 +37,7 @@
   "dependencies": {
     "@octokit/rest": "^22.0.0",
     "aws-sdk": "^2.1692.0",
+    "axios": "^1.11.0",
     "bcryptjs": "^3.0.2",
     "cloudinary": "^2.7.0",
     "cookie-parser": "^1.4.7",
@@ -48,6 +48,7 @@
     "express-session": "^1.18.2",
     "express-validator": "^7.2.1",
     "helmet": "^7.1.0",
+    "joi": "^18.0.0",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.17.1",
     "mongoose-paginate-v2": "^1.9.1",
@@ -58,7 +59,8 @@
     "pdfkit": "^0.17.1",
     "sharp": "^0.34.3",
     "twilio": "^5.8.0",
-    "uuid": "^11.1.0"
+    "uuid": "^11.1.0",
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "eslint": "^8.56.0",

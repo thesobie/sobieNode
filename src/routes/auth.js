@@ -3,7 +3,7 @@ const router = express.Router();
 const authController = require('../controllers/authController');
 const accountRecoveryController = require('../controllers/accountRecoveryController');
 const { authMiddleware, requireEmailVerification } = require('../middleware/auth');
-const { validate } = require('../middleware/validation');
+const { validationMiddleware } = require('../middleware/validation');
 const { body } = require('express-validator');
 
 // Public routes (no authentication required)
@@ -59,13 +59,13 @@ router.post('/find-account', [
   body('email').optional().isEmail().normalizeEmail().withMessage('Please provide a valid email'),
   body('institution').optional().trim().isLength({ min: 1, max: 100 }).withMessage('Institution must be 1-100 characters'),
   body('alternateEmail').optional().isEmail().normalizeEmail().withMessage('Please provide a valid alternate email'),
-  validate
+  validationMiddleware
 ], accountRecoveryController.findAccount);
 
 // POST /api/auth/check-email - Check if email exists in system (privacy-friendly)
 router.post('/check-email', [
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
-  validate
+  validationMiddleware
 ], accountRecoveryController.checkEmailExists);
 
 // POST /api/auth/recover-account - Request account recovery for specific user
@@ -73,7 +73,7 @@ router.post('/recover-account', [
   body('userId').isMongoId().withMessage('Valid user ID is required'),
   body('email').isEmail().normalizeEmail().withMessage('Please provide a valid email'),
   body('recoveryMethod').optional().isIn(['magic_link', 'password_reset']).withMessage('Recovery method must be "magic_link" or "password_reset"'),
-  validate
+  validationMiddleware
 ], accountRecoveryController.recoverAccount);
 
 // Protected routes (authentication required)

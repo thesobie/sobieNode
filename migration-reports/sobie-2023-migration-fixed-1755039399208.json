@@ -1,0 +1,28 @@
+{
+  "migrationDate": "2025-08-12T22:56:39.208Z",
+  "conference": "undefined (2023)",
+  "statistics": {
+    "conferenceCreated": 0,
+    "usersCreated": 0,
+    "usersUpdated": 0,
+    "registrationsCreated": 0,
+    "sessionsCreated": 0,
+    "researchSubmissionsCreated": 0,
+    "totalRecordsCreated": 0,
+    "errorCount": 225
+  },
+  "successRate": 0,
+  "errors": [
+    "User creation (Resort Destin): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Amye Melton): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Fred Kindelsperger): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Keith Malone): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Dennis Pearson): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Mitch Moon): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Breonna Roden): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Doug Barrett): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (Presidential Personnel): User validation failed: historicalDataSource: Path `historicalDataSource` is required.",
+    "User creation (International Development): User validation failed: historicalDataSource: Path `historicalDataSource` is required."
+  ],
+  "totalErrors": 225
+}

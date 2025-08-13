@@ -142,9 +142,107 @@ const userSchema = new mongoose.Schema({
       return this.userType === 'student';
     }
   },
+  
+  // Application-level roles (system permissions)
+  appRoles: {
+    type: [String],
+    enum: ['user', 'admin', 'developer'],
+    default: ['user'],
+    validate: {
+      validator: function(roles) {
+        // Ensure at least one app role is assigned
+        return roles && roles.length > 0;
+      },
+      message: 'User must have at least one application role assigned'
+    }
+  },
+  
+  // SOBIE community roles (conference-specific)
+  sobieRoles: {
+    type: [String],
+    enum: [
+      'attendee',
+      'researcher', 
+      'presenter',
+      'vendor',
+      'volunteer',
+      'session-chair',
+      'panelist',
+      'keynote-speaker',
+      'activity-coordinator',
+      'officer',
+      'conference-chairperson',
+      'editor',
+      'reviewer',
+      'in-memoriam'
+    ],
+    default: ['attendee'],
+    validate: {
+      validator: function(roles) {
+        // Memorial users don't need other SOBIE roles
+        if (roles.includes('in-memoriam')) {
+          return true;
+        }
+        // Otherwise ensure at least one SOBIE role is assigned
+        return roles && roles.length > 0;
+      },
+      message: 'User must have at least one SOBIE role assigned'
+    }
+  },
+  
+  // Role-specific metadata
+  roleDetails: {
+    // Officer details (when sobieRoles includes 'officer')
+    officerRole: {
+      type: String,
+      enum: ['president', 'vice-president', 'treasurer', 'secretary', 'board-member'],
+      required: function() {
+        return this.sobieRoles && this.sobieRoles.includes('officer');
+      }
+    },
+    
+    // Activity coordinator details (when sobieRoles includes 'activity-coordinator')
+    activityType: {
+      type: String,
+      enum: ['golf', 'trivia', 'volleyball', 'social-event', 'networking', 'other'],
+      required: function() {
+        return this.sobieRoles && this.sobieRoles.includes('activity-coordinator');
+      }
+    },
+    
+    // Custom activity type (when activityType is 'other')
+    customActivityType: {
+      type: String,
+      trim: true,
+      maxlength: [50, 'Custom activity type cannot exceed 50 characters'],
+      required: function() {
+        return this.roleDetails && this.roleDetails.activityType === 'other';
+      }
+    },
+    
+    // Years served in role (for officers, chairs, etc.)
+    yearsServed: [{
+      year: {
+        type: Number,
+        min: 2000,
+        max: new Date().getFullYear() + 5
+      },
+      role: {
+        type: String,
+        enum: ['officer', 'conference-chairperson', 'editor', 'activity-coordinator', 'session-chair']
+      },
+      description: {
+        type: String,
+        trim: true,
+        maxlength: [200, 'Role description cannot exceed 200 characters']
+      }
+    }]
+  },
+
+  // Legacy roles field (deprecated, keeping for backward compatibility)
   roles: {
     type: [String],
-    enum: ['user', 'reviewer', 'committee', 'admin', 'editor', 'conference-chairperson', 'president', 'activity-coordinator'],
+    enum: ['user', 'reviewer', 'committee', 'admin', 'editor', 'conference-chairperson', 'president', 'activity-coordinator', 'in-memoriam'],
     default: ['user'],
     validate: {
       validator: function(roles) {
@@ -428,6 +526,36 @@ const userSchema = new mongoose.Schema({
     type: Boolean,
     default: true
   },
+  
+  // Memorial Fields for 'in-memoriam' users
+  memorial: {
+    dateOfPassing: {
+      type: Date,
+      required: function() {
+        return this.roles && this.roles.includes('in-memoriam');
+      }
+    },
+    memorialNote: {
+      type: String,
+      maxlength: [500, 'Memorial note cannot exceed 500 characters'],
+      trim: true
+    },
+    addedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: function() {
+        return this.roles && this.roles.includes('in-memoriam');
+      }
+    },
+    addedDate: {
+      type: Date,
+      default: Date.now,
+      required: function() {
+        return this.roles && this.roles.includes('in-memoriam');
+      }
+    }
+  },
+  
   isHistoricalData: {
     type: Boolean,
     default: false,
@@ -548,9 +676,120 @@ userSchema.virtual('profile.socialLinks.displayCategory').get(function() {
   return this.category === 'other' && this.customCategory ? this.customCategory : this.category;
 });
 
-// Virtual methods for role checking
+// Virtual for memorial status
+userSchema.virtual('isInMemoriam').get(function() {
+  return (this.roles && this.roles.includes('in-memoriam')) || 
+         (this.sobieRoles && this.sobieRoles.includes('in-memoriam'));
+});
+
+// Virtual for memorial display information
+userSchema.virtual('memorialDisplay').get(function() {
+  if (!this.isInMemoriam || !this.memorial) return null;
+  
+  return {
+    dateOfPassing: this.memorial.dateOfPassing,
+    memorialNote: this.memorial.memorialNote,
+    yearsPassed: this.memorial.dateOfPassing ? 
+      new Date().getFullYear() - this.memorial.dateOfPassing.getFullYear() : null,
+    formattedDate: this.memorial.dateOfPassing ? 
+      this.memorial.dateOfPassing.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long', 
+        day: 'numeric' 
+      }) : null
+  };
+});
+
+// Virtual methods for app role checking
 userSchema.virtual('isAdmin').get(function() {
-  return this.roles && this.roles.includes('admin');
+  return (this.roles && this.roles.includes('admin')) || 
+         (this.appRoles && this.appRoles.includes('admin'));
+});
+
+userSchema.virtual('isDeveloper').get(function() {
+  return this.appRoles && this.appRoles.includes('developer');
+});
+
+// Virtual methods for SOBIE role checking
+userSchema.virtual('isAttendee').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('attendee');
+});
+
+userSchema.virtual('isPresenter').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('presenter');
+});
+
+userSchema.virtual('isResearcher').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('researcher');
+});
+
+userSchema.virtual('isVendor').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('vendor');
+});
+
+userSchema.virtual('isVolunteer').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('volunteer');
+});
+
+userSchema.virtual('isSessionChair').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('session-chair');
+});
+
+userSchema.virtual('isPanelist').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('panelist');
+});
+
+userSchema.virtual('isKeynoteSpeaker').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('keynote-speaker');
+});
+
+userSchema.virtual('isActivityCoordinator').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('activity-coordinator');
+});
+
+userSchema.virtual('isOfficer').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('officer');
+});
+
+userSchema.virtual('isConferenceChairperson').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('conference-chairperson');
+});
+
+userSchema.virtual('isEditor').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('editor');
+});
+
+userSchema.virtual('isReviewer').get(function() {
+  return this.sobieRoles && this.sobieRoles.includes('reviewer');
+});
+
+// Virtual for role display information
+userSchema.virtual('roleDisplay').get(function() {
+  const display = {
+    appRoles: this.appRoles || [],
+    sobieRoles: this.sobieRoles || [],
+    roleDetails: {}
+  };
+
+  // Add officer role details
+  if (this.isOfficer && this.roleDetails && this.roleDetails.officerRole) {
+    display.roleDetails.officerRole = this.roleDetails.officerRole;
+  }
+
+  // Add activity coordinator details
+  if (this.isActivityCoordinator && this.roleDetails) {
+    if (this.roleDetails.activityType) {
+      display.roleDetails.activityType = this.roleDetails.activityType === 'other' && this.roleDetails.customActivityType ?
+        this.roleDetails.customActivityType : this.roleDetails.activityType;
+    }
+  }
+
+  // Add years served
+  if (this.roleDetails && this.roleDetails.yearsServed && this.roleDetails.yearsServed.length > 0) {
+    display.roleDetails.yearsServed = this.roleDetails.yearsServed;
+  }
+
+  return display;
 });
 
 userSchema.virtual('isEditor').get(function() {
@@ -830,6 +1069,129 @@ userSchema.pre('save', function(next) {
   next();
 });
 
+// Pre-save middleware for role synchronization and validation
+userSchema.pre('save', function(next) {
+  // Sync legacy roles with new dual role system for backward compatibility
+  if (this.isModified('roles') || this.isModified('appRoles') || this.isModified('sobieRoles')) {
+    
+    // If legacy roles are being set, sync to new system
+    if (this.isModified('roles') && this.roles) {
+      // Extract app roles from legacy roles
+      const appRoles = this.roles.filter(role => ['user', 'admin', 'developer'].includes(role));
+      if (appRoles.length > 0) {
+        this.appRoles = [...new Set([...this.appRoles, ...appRoles])];
+      }
+      
+      // Extract SOBIE roles from legacy roles
+      const sobieRoleMapping = {
+        'reviewer': 'reviewer',
+        'committee': 'volunteer',
+        'editor': 'editor',
+        'conference-chairperson': 'conference-chairperson',
+        'president': 'officer',
+        'activity-coordinator': 'activity-coordinator',
+        'in-memoriam': 'in-memoriam'
+      };
+      
+      const sobieRoles = this.roles
+        .map(role => sobieRoleMapping[role])
+        .filter(role => role);
+        
+      if (sobieRoles.length > 0) {
+        this.sobieRoles = [...new Set([...this.sobieRoles, ...sobieRoles])];
+      }
+      
+      // Set officer role for president
+      if (this.roles.includes('president')) {
+        if (!this.roleDetails) this.roleDetails = {};
+        this.roleDetails.officerRole = 'president';
+      }
+    }
+    
+    // Ensure default roles are set
+    if (!this.appRoles || this.appRoles.length === 0) {
+      this.appRoles = ['user'];
+    }
+    
+    if (!this.sobieRoles || this.sobieRoles.length === 0) {
+      // Don't set default SOBIE roles for memorial users
+      if (!this.isInMemoriam) {
+        this.sobieRoles = ['attendee'];
+      }
+    }
+  }
+  
+  next();
+});
+
+// Pre-save middleware for memorial role validation
+userSchema.pre('save', function(next) {
+  const hasInMemoriamRole = (this.roles && this.roles.includes('in-memoriam')) ||
+                           (this.sobieRoles && this.sobieRoles.includes('in-memoriam'));
+  
+  // If user has 'in-memoriam' role, ensure memorial fields are properly set
+  if (hasInMemoriamRole) {
+    if (!this.memorial) {
+      this.memorial = {};
+    }
+    
+    // Set defaults if not provided
+    if (!this.memorial.addedDate) {
+      this.memorial.addedDate = new Date();
+    }
+    
+    // Validate required fields
+    if (!this.memorial.dateOfPassing) {
+      return next(new Error('Date of passing is required for in-memoriam users'));
+    }
+    
+    if (!this.memorial.addedBy) {
+      return next(new Error('Admin who added memorial status is required'));
+    }
+    
+    // Ensure in-memoriam is in both role systems for consistency
+    if (!this.roles.includes('in-memoriam')) {
+      this.roles.push('in-memoriam');
+    }
+    if (!this.sobieRoles.includes('in-memoriam')) {
+      this.sobieRoles.push('in-memoriam');
+    }
+    
+    // Set user as inactive
+    this.isActive = false;
+  } else {
+    // If user no longer has 'in-memoriam' role, clear memorial data
+    if (this.memorial && Object.keys(this.memorial).length > 0) {
+      this.memorial = undefined;
+    }
+  }
+  
+  next();
+});
+
+// Pre-save middleware for role-specific validation
+userSchema.pre('save', function(next) {
+  // Validate officer role details
+  if (this.sobieRoles && this.sobieRoles.includes('officer')) {
+    if (!this.roleDetails || !this.roleDetails.officerRole) {
+      return next(new Error('Officer role details are required for officers'));
+    }
+  }
+  
+  // Validate activity coordinator details
+  if (this.sobieRoles && this.sobieRoles.includes('activity-coordinator')) {
+    if (!this.roleDetails || !this.roleDetails.activityType) {
+      return next(new Error('Activity type is required for activity coordinators'));
+    }
+    
+    if (this.roleDetails.activityType === 'other' && !this.roleDetails.customActivityType) {
+      return next(new Error('Custom activity type is required when activity type is "other"'));
+    }
+  }
+  
+  next();
+});
+
 // Pre-save middleware to hash password
 userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next();
@@ -908,6 +1270,340 @@ userSchema.statics.findByEmailVerificationToken = function(token) {
     emailVerificationToken: hashedToken,
     emailVerificationExpires: { $gt: Date.now() }
   });
+};
+
+// Static methods for memorial management
+userSchema.statics.findMemorialUsers = function(options = {}) {
+  const query = { 
+    $or: [
+      { roles: 'in-memoriam' },
+      { sobieRoles: 'in-memoriam' }
+    ]
+  };
+  
+  // Add year filter if provided
+  if (options.year) {
+    const startOfYear = new Date(options.year, 0, 1);
+    const endOfYear = new Date(options.year, 11, 31, 23, 59, 59);
+    query['memorial.dateOfPassing'] = {
+      $gte: startOfYear,
+      $lte: endOfYear
+    };
+  }
+  
+  return this.find(query)
+    .populate('memorial.addedBy', 'name.first name.last email')
+    .sort({ 'memorial.dateOfPassing': -1 });
+};
+
+userSchema.statics.addMemorialStatus = async function(userId, memorialData, adminId) {
+  const user = await this.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
+  // Add 'in-memoriam' role to both role systems for consistency
+  if (!user.roles.includes('in-memoriam')) {
+    user.roles.push('in-memoriam');
+  }
+  if (!user.sobieRoles.includes('in-memoriam')) {
+    user.sobieRoles.push('in-memoriam');
+  }
+  
+  // Set memorial data
+  user.memorial = {
+    dateOfPassing: memorialData.dateOfPassing,
+    memorialNote: memorialData.memorialNote || '',
+    addedBy: adminId,
+    addedDate: new Date()
+  };
+  
+  await user.save();
+  return user;
+};
+
+userSchema.statics.removeMemorialStatus = async function(userId) {
+  const user = await this.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
+  // Remove 'in-memoriam' role from both systems
+  user.roles = user.roles.filter(role => role !== 'in-memoriam');
+  user.sobieRoles = user.sobieRoles.filter(role => role !== 'in-memoriam');
+  
+  // Clear memorial data
+  user.memorial = undefined;
+  
+  await user.save();
+  return user;
+};
+
+userSchema.statics.getMemorialStats = function() {
+  return this.aggregate([
+    { 
+      $match: { 
+        $or: [
+          { roles: 'in-memoriam' },
+          { sobieRoles: 'in-memoriam' }
+        ]
+      }
+    },
+    {
+      $group: {
+        _id: null,
+        totalMemorialUsers: { $sum: 1 },
+        byYear: {
+          $push: {
+            year: { $year: '$memorial.dateOfPassing' },
+            name: { $concat: ['$name.first', ' ', '$name.last'] }
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        totalMemorialUsers: 1,
+        byYear: {
+          $reduce: {
+            input: '$byYear',
+            initialValue: {},
+            in: {
+              $mergeObjects: [
+                '$$value',
+                {
+                  $arrayToObject: [[{
+                    k: { $toString: '$$this.year' },
+                    v: { $concatArrays: [
+                      { $ifNull: [{ $objectToArray: '$$value' }, []] },
+                      ['$$this.name']
+                    ]}
+                  }]]
+                }
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]);
+};
+
+// Static methods for role management
+userSchema.statics.findByAppRole = function(roleName, options = {}) {
+  const query = { appRoles: roleName };
+  
+  let queryBuilder = this.find(query);
+  
+  if (options.includeInactive) {
+    // Include inactive users
+  } else {
+    queryBuilder = queryBuilder.where({ isActive: true });
+  }
+  
+  if (options.populate) {
+    queryBuilder = queryBuilder.populate(options.populate);
+  }
+  
+  return queryBuilder.sort(options.sort || { createdAt: -1 });
+};
+
+userSchema.statics.findBySobieRole = function(roleName, options = {}) {
+  const query = { sobieRoles: roleName };
+  
+  let queryBuilder = this.find(query);
+  
+  if (options.includeInactive) {
+    // Include inactive users
+  } else {
+    queryBuilder = queryBuilder.where({ isActive: true });
+  }
+  
+  if (options.populate) {
+    queryBuilder = queryBuilder.populate(options.populate);
+  }
+  
+  return queryBuilder.sort(options.sort || { createdAt: -1 });
+};
+
+userSchema.statics.findOfficers = function(officerRole = null) {
+  const query = { sobieRoles: 'officer' };
+  
+  if (officerRole) {
+    query['roleDetails.officerRole'] = officerRole;
+  }
+  
+  return this.find(query)
+    .where({ isActive: true })
+    .select('name appRoles sobieRoles roleDetails affiliation')
+    .sort({ 'roleDetails.yearsServed.year': -1 });
+};
+
+userSchema.statics.findActivityCoordinators = function(activityType = null) {
+  const query = { sobieRoles: 'activity-coordinator' };
+  
+  if (activityType) {
+    query['roleDetails.activityType'] = activityType;
+  }
+  
+  return this.find(query)
+    .where({ isActive: true })
+    .select('name appRoles sobieRoles roleDetails contact')
+    .sort({ 'name.last': 1 });
+};
+
+userSchema.statics.getRoleStatistics = function() {
+  return this.aggregate([
+    {
+      $match: { isActive: true }
+    },
+    {
+      $group: {
+        _id: null,
+        totalUsers: { $sum: 1 },
+        appRoleStats: {
+          $push: '$appRoles'
+        },
+        sobieRoleStats: {
+          $push: '$sobieRoles'
+        },
+        officerRoles: {
+          $push: {
+            $cond: [
+              { $in: ['officer', '$sobieRoles'] },
+              '$roleDetails.officerRole',
+              null
+            ]
+          }
+        },
+        activityTypes: {
+          $push: {
+            $cond: [
+              { $in: ['activity-coordinator', '$sobieRoles'] },
+              '$roleDetails.activityType',
+              null
+            ]
+          }
+        }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        totalUsers: 1,
+        appRoles: {
+          $reduce: {
+            input: '$appRoleStats',
+            initialValue: {},
+            in: {
+              $mergeObjects: [
+                '$$value',
+                {
+                  $arrayToObject: {
+                    $map: {
+                      input: '$$this',
+                      in: {
+                        k: '$$this',
+                        v: { $add: [{ $ifNull: [{ $getField: { field: '$$this', input: '$$value' }}, 0] }, 1] }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        sobieRoles: {
+          $reduce: {
+            input: '$sobieRoleStats',
+            initialValue: {},
+            in: {
+              $mergeObjects: [
+                '$$value',
+                {
+                  $arrayToObject: {
+                    $map: {
+                      input: '$$this',
+                      in: {
+                        k: '$$this',
+                        v: { $add: [{ $ifNull: [{ $getField: { field: '$$this', input: '$$value' }}, 0] }, 1] }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          }
+        },
+        officerBreakdown: {
+          $arrayToObject: {
+            $map: {
+              input: {
+                $setUnion: [{ $filter: { input: '$officerRoles', cond: { $ne: ['$$this', null] } } }]
+              },
+              in: {
+                k: '$$this',
+                v: {
+                  $size: {
+                    $filter: {
+                      input: '$officerRoles',
+                      cond: { $eq: ['$$this', '$$this'] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        activityBreakdown: {
+          $arrayToObject: {
+            $map: {
+              input: {
+                $setUnion: [{ $filter: { input: '$activityTypes', cond: { $ne: ['$$this', null] } } }]
+              },
+              in: {
+                k: '$$this',
+                v: {
+                  $size: {
+                    $filter: {
+                      input: '$activityTypes',
+                      cond: { $eq: ['$$this', '$$this'] }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]);
+};
+
+userSchema.statics.updateUserRoles = async function(userId, roleUpdates) {
+  const user = await this.findById(userId);
+  if (!user) {
+    throw new Error('User not found');
+  }
+  
+  // Update app roles if provided
+  if (roleUpdates.appRoles) {
+    user.appRoles = roleUpdates.appRoles;
+  }
+  
+  // Update SOBIE roles if provided
+  if (roleUpdates.sobieRoles) {
+    user.sobieRoles = roleUpdates.sobieRoles;
+  }
+  
+  // Update role details if provided
+  if (roleUpdates.roleDetails) {
+    user.roleDetails = { ...user.roleDetails, ...roleUpdates.roleDetails };
+  }
+  
+  await user.save();
+  return user;
 };
 
 // Method to increment login attempts
@@ -1003,6 +1699,11 @@ userSchema.methods.getPublicProfile = function() {
 
   if (this.privacySettings.sobieHistory.publications) {
     profile.sobiePublications = this.sobieHistory.publications;
+  }
+
+  // Always include memorial information for 'in-memoriam' users
+  if (this.isInMemoriam) {
+    profile.memorial = this.memorialDisplay;
   }
 
   return profile;

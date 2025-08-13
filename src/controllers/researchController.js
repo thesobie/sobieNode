@@ -1,12 +1,12 @@
 const ResearchPresentation = require('../models/ResearchPresentation');
 const Conference = require('../models/Conference');
 const Session = require('../models/Session');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 
 // @desc    Get user's research presentations across all conferences
 // @route   GET /api/research/me/presentations
 // @access  Private
-const getMyPresentations = asyncHandler(async (req, res) => {
+const getMyPresentations = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { year, discipline, type, includeCoauthored = true } = req.query;
 
@@ -126,7 +126,7 @@ const getMyPresentations = asyncHandler(async (req, res) => {
 // @desc    Get detailed view of a specific presentation (if user is author)
 // @route   GET /api/research/me/presentations/:id
 // @access  Private
-const getMyPresentationDetails = asyncHandler(async (req, res) => {
+const getMyPresentationDetails = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const presentationId = req.params.id;
 
@@ -167,7 +167,7 @@ const getMyPresentationDetails = asyncHandler(async (req, res) => {
 // @desc    Get user's research collaboration network
 // @route   GET /api/research/me/collaborations
 // @access  Private
-const getMyCollaborations = asyncHandler(async (req, res) => {
+const getMyCollaborations = catchAsync(async (req, res) => {
   const userId = req.user._id;
 
   const presentations = await ResearchPresentation.find({
@@ -227,7 +227,7 @@ const getMyCollaborations = asyncHandler(async (req, res) => {
 // @desc    Get user's complete SOBIE participation history
 // @route   GET /api/research/me/sobie-history
 // @access  Private
-const getMyCompleteSobieHistory = asyncHandler(async (req, res) => {
+const getMyCompleteSobieHistory = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const user = req.user;
 
@@ -376,7 +376,7 @@ const getMyCompleteSobieHistory = asyncHandler(async (req, res) => {
 // @desc    Search presentations by criteria (for user's own work)
 // @route   GET /api/research/me/search
 // @access  Private
-const searchMyPresentations = asyncHandler(async (req, res) => {
+const searchMyPresentations = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { q, discipline, year, type, role } = req.query;
 

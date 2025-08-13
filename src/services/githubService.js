@@ -1,4 +1,5 @@
 const { Octokit } = require('@octokit/rest');
+const logger = require('../config/logger');
 
 class GitHubService {
   constructor() {
@@ -52,7 +53,12 @@ class GitHubService {
         }
       };
     } catch (error) {
-      console.error('Error creating GitHub issue:', error);
+      logger.error('Error creating GitHub issue', { 
+        error: error.message,
+        bugReportId: bugReport._id,
+        service: 'GitHubService',
+        method: 'createIssue'
+      });
       return {
         success: false,
         error: error.message
@@ -80,7 +86,12 @@ class GitHubService {
         issue: response.data
       };
     } catch (error) {
-      console.error('Error updating GitHub issue:', error);
+      logger.error('Error updating GitHub issue', { 
+        error: error.message,
+        issueNumber,
+        service: 'GitHubService',
+        method: 'updateIssue'
+      });
       return {
         success: false,
         error: error.message
@@ -113,7 +124,13 @@ class GitHubService {
         issue: response.data
       };
     } catch (error) {
-      console.error('Error closing GitHub issue:', error);
+      logger.error('Error closing GitHub issue', { 
+        error: error.message,
+        issueNumber,
+        reason,
+        service: 'GitHubService',
+        method: 'closeIssue'
+      });
       return {
         success: false,
         error: error.message
@@ -141,7 +158,12 @@ class GitHubService {
         comment: response.data
       };
     } catch (error) {
-      console.error('Error adding comment to GitHub issue:', error);
+      logger.error('Error adding comment to GitHub issue', { 
+        error: error.message,
+        issueNumber,
+        service: 'GitHubService',
+        method: 'addCommentToIssue'
+      });
       return {
         success: false,
         error: error.message
@@ -169,7 +191,13 @@ class GitHubService {
         labels: response.data
       };
     } catch (error) {
-      console.error('Error adding labels to GitHub issue:', error);
+      logger.error('Error adding labels to GitHub issue', { 
+        error: error.message,
+        issueNumber,
+        labels,
+        service: 'GitHubService',
+        method: 'addLabelsToIssue'
+      });
       return {
         success: false,
         error: error.message
@@ -195,7 +223,12 @@ class GitHubService {
         issue: response.data
       };
     } catch (error) {
-      console.error('Error getting GitHub issue:', error);
+      logger.error('Error getting GitHub issue', { 
+        error: error.message,
+        issueNumber,
+        service: 'GitHubService',
+        method: 'getIssue'
+      });
       return {
         success: false,
         error: error.message
@@ -222,7 +255,12 @@ class GitHubService {
         totalCount: response.data.total_count
       };
     } catch (error) {
-      console.error('Error searching GitHub issues:', error);
+      logger.error('Error searching GitHub issues', { 
+        error: error.message,
+        query,
+        service: 'GitHubService',
+        method: 'searchIssues'
+      });
       return {
         success: false,
         error: error.message
@@ -259,7 +297,13 @@ class GitHubService {
         hasSimilar: false
       };
     } catch (error) {
-      console.error('Error finding similar issues:', error);
+      logger.error('Error finding similar issues', { 
+        error: error.message,
+        title,
+        description,
+        service: 'GitHubService',
+        method: 'findSimilarIssues'
+      });
       return {
         success: false,
         error: error.message
@@ -323,20 +367,37 @@ class GitHubService {
             color: label.color,
             description: label.description
           });
-          console.log(`Created label: ${label.name}`);
+          logger.info('Created GitHub label successfully', { 
+            labelName: label.name,
+            service: 'GitHubService',
+            method: 'ensureLabelsExist'
+          });
         } catch (error) {
           if (error.status === 422) {
             // Label already exists, that's okay
-            console.log(`Label ${label.name} already exists`);
+            logger.debug('GitHub label already exists', { 
+              labelName: label.name,
+              service: 'GitHubService',
+              method: 'ensureLabelsExist'
+            });
           } else {
-            console.error(`Error creating label ${label.name}:`, error.message);
+            logger.error('Error creating GitHub label', { 
+              labelName: label.name, 
+              error: error.message,
+              service: 'GitHubService',
+              method: 'ensureLabelsExist'
+            });
           }
         }
       }
 
       return { success: true };
     } catch (error) {
-      console.error('Error ensuring labels exist:', error);
+      logger.error('Error ensuring GitHub labels exist', { 
+        error: error.message,
+        service: 'GitHubService',
+        method: 'ensureLabelsExist'
+      });
       return { success: false, error: error.message };
     }
   }

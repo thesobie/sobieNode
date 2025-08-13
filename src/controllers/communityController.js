@@ -1,4 +1,4 @@
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const CommunityActivity = require('../models/CommunityActivity');
 const CommunityInterest = require('../models/CommunityInterest');
 const User = require('../models/User');
@@ -8,7 +8,7 @@ const mongoose = require('mongoose');
 // @desc    Get community activities dashboard for users
 // @route   GET /api/community/:conferenceId/activities
 // @access  Private
-const getCommunityActivities = asyncHandler(async (req, res) => {
+const getCommunityActivities = catchAsync(async (req, res) => {
   const { conferenceId } = req.params;
   const { type, status, includeMyInterests } = req.query;
 
@@ -76,7 +76,7 @@ const getCommunityActivities = asyncHandler(async (req, res) => {
 // @desc    Express interest in a community activity
 // @route   POST /api/community/:conferenceId/activities/:activityId/interest
 // @access  Private
-const expressInterest = asyncHandler(async (req, res) => {
+const expressInterest = catchAsync(async (req, res) => {
   const { conferenceId, activityId } = req.params;
   const userId = req.user._id;
   const {
@@ -175,7 +175,7 @@ const expressInterest = asyncHandler(async (req, res) => {
 // @desc    Update user's interest in an activity
 // @route   PUT /api/community/:conferenceId/activities/:activityId/interest
 // @access  Private
-const updateInterest = asyncHandler(async (req, res) => {
+const updateInterest = catchAsync(async (req, res) => {
   const { conferenceId, activityId } = req.params;
   const userId = req.user._id;
   const updates = req.body;
@@ -213,7 +213,7 @@ const updateInterest = asyncHandler(async (req, res) => {
 // @desc    Withdraw interest from an activity
 // @route   DELETE /api/community/:conferenceId/activities/:activityId/interest
 // @access  Private
-const withdrawInterest = asyncHandler(async (req, res) => {
+const withdrawInterest = catchAsync(async (req, res) => {
   const { conferenceId, activityId } = req.params;
   const userId = req.user._id;
 
@@ -253,7 +253,7 @@ const withdrawInterest = asyncHandler(async (req, res) => {
 // @desc    Get user's community interests
 // @route   GET /api/community/:conferenceId/my-interests
 // @access  Private
-const getMyInterests = asyncHandler(async (req, res) => {
+const getMyInterests = catchAsync(async (req, res) => {
   const { conferenceId } = req.params;
   const userId = req.user._id;
 
@@ -292,7 +292,7 @@ const getMyInterests = asyncHandler(async (req, res) => {
 // @desc    Get activity coordinator dashboard
 // @route   GET /api/community/:conferenceId/coordinator/dashboard
 // @access  Private (Activity Coordinator role required)
-const getCoordinatorDashboard = asyncHandler(async (req, res) => {
+const getCoordinatorDashboard = catchAsync(async (req, res) => {
   const { conferenceId } = req.params;
   const coordinatorId = req.user._id;
 
@@ -350,7 +350,7 @@ const getCoordinatorDashboard = asyncHandler(async (req, res) => {
 // @desc    Get participants for coordinator's activity
 // @route   GET /api/community/:conferenceId/coordinator/activities/:activityId/participants
 // @access  Private (Activity Coordinator role required)
-const getActivityParticipants = asyncHandler(async (req, res) => {
+const getActivityParticipants = catchAsync(async (req, res) => {
   const { conferenceId, activityId } = req.params;
   const { status, includeContactInfo } = req.query;
 
@@ -434,7 +434,7 @@ const getActivityParticipants = asyncHandler(async (req, res) => {
 // @desc    Create new community activity (Admin/Coordinator)
 // @route   POST /api/community/:conferenceId/activities
 // @access  Private (Admin or Activity Coordinator)
-const createActivity = asyncHandler(async (req, res) => {
+const createActivity = catchAsync(async (req, res) => {
   const { conferenceId } = req.params;
   const {
     name,

@@ -9,12 +9,12 @@ const {
   getBugReportStatistics,
   getGitHubStatus
 } = require('../controllers/bugReportController');
-const { authenticateUser, authorizeRoles } = require('../middleware/auth');
-const { validate } = require('../middleware/validation');
+const { authMiddleware, requireRole } = require('../middleware/auth');
+const { validationMiddleware } = require('../middleware/validation');
 const { body, param, query } = require('express-validator');
 
 // All bug report routes require authentication
-router.use(authenticateUser);
+router.use(authMiddleware);
 
 // Bug report validation schemas
 const submitBugReportValidation = [
@@ -167,7 +167,7 @@ const reportIdValidation = [
 // @access  Private
 router.post('/', 
   submitBugReportValidation,
-  validate,
+  validationMiddleware,
   submitBugReport
 );
 
@@ -180,7 +180,7 @@ router.get('/my-reports',
   query('severity').optional().isIn(['low', 'medium', 'high', 'critical']),
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
-  validate,
+  validationMiddleware,
   getMyBugReports
 );
 
@@ -189,7 +189,7 @@ router.get('/my-reports',
 // @access  Private (Own reports or Admin/Editor)
 router.get('/:reportId',
   reportIdValidation,
-  validate,
+  validationMiddleware,
   getBugReport
 );
 
@@ -199,7 +199,7 @@ router.get('/:reportId',
 // @route   GET /api/bug-reports/admin/all
 // @access  Private (Admin/Editor)
 router.get('/admin/all',
-  authorizeRoles(['admin', 'editor']),
+  requireRole('admin', 'editor'),
   query('status').optional().isIn(['submitted', 'triaged', 'in_progress', 'resolved', 'closed', 'duplicate']),
   query('category').optional().isIn(['ui_ux', 'functionality', 'performance', 'data', 'security', 'mobile', 'integration', 'other']),
   query('severity').optional().isIn(['low', 'medium', 'high', 'critical']),
@@ -208,7 +208,7 @@ router.get('/admin/all',
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
   query('search').optional().trim(),
-  validate,
+  validationMiddleware,
   getAllBugReports
 );
 
@@ -216,10 +216,10 @@ router.get('/admin/all',
 // @route   PUT /api/bug-reports/:reportId/status
 // @access  Private (Admin/Editor)
 router.put('/:reportId/status',
-  authorizeRoles(['admin', 'editor']),
+  requireRole('admin', 'editor'),
   reportIdValidation,
   updateStatusValidation,
-  validate,
+  validationMiddleware,
   updateBugReportStatus
 );
 
@@ -227,10 +227,10 @@ router.put('/:reportId/status',
 // @route   GET /api/bug-reports/admin/statistics
 // @access  Private (Admin)
 router.get('/admin/statistics',
-  authorizeRoles(['admin']),
+  requireRole('admin'),
   query('timeframe').optional().isIn(['7d', '30d', '90d', 'all']),
   query('conferenceId').optional().isMongoId(),
-  validate,
+  validationMiddleware,
   getBugReportStatistics
 );
 
@@ -238,7 +238,7 @@ router.get('/admin/statistics',
 // @route   GET /api/bug-reports/admin/github-status
 // @access  Private (Admin)
 router.get('/admin/github-status',
-  authorizeRoles(['admin']),
+  requireRole('admin'),
   getGitHubStatus
 );
 

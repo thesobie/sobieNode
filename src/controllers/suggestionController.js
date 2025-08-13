@@ -1,13 +1,13 @@
 const UserSuggestion = require('../models/UserSuggestion');
 const User = require('../models/User');
 const ResearchPresentation = require('../models/ResearchPresentation');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const { sendEmail } = require('../services/emailService');
 
 // @desc    Submit a new suggestion
 // @route   POST /api/suggestions
 // @access  Private
-const submitSuggestion = asyncHandler(async (req, res) => {
+const submitSuggestion = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const {
     suggestionType,
@@ -98,7 +98,7 @@ const submitSuggestion = asyncHandler(async (req, res) => {
 // @desc    Get user's own suggestions
 // @route   GET /api/suggestions/me
 // @access  Private
-const getMySuggestions = asyncHandler(async (req, res) => {
+const getMySuggestions = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { status, limit = 20, page = 1 } = req.query;
 
@@ -131,7 +131,7 @@ const getMySuggestions = asyncHandler(async (req, res) => {
 // @desc    Get suggestion by ID (if user owns it)
 // @route   GET /api/suggestions/:id
 // @access  Private
-const getSuggestion = asyncHandler(async (req, res) => {
+const getSuggestion = catchAsync(async (req, res) => {
   const suggestionId = req.params.id;
   const userId = req.user._id;
 
@@ -160,7 +160,7 @@ const getSuggestion = asyncHandler(async (req, res) => {
 // @desc    Update suggestion (before review)
 // @route   PUT /api/suggestions/:id
 // @access  Private
-const updateSuggestion = asyncHandler(async (req, res) => {
+const updateSuggestion = catchAsync(async (req, res) => {
   const suggestionId = req.params.id;
   const userId = req.user._id;
 
@@ -208,7 +208,7 @@ const updateSuggestion = asyncHandler(async (req, res) => {
 // @desc    Cancel suggestion
 // @route   DELETE /api/suggestions/:id
 // @access  Private
-const cancelSuggestion = asyncHandler(async (req, res) => {
+const cancelSuggestion = catchAsync(async (req, res) => {
   const suggestionId = req.params.id;
   const userId = req.user._id;
 
@@ -236,7 +236,7 @@ const cancelSuggestion = asyncHandler(async (req, res) => {
 // @desc    Get suggestion form options
 // @route   GET /api/suggestions/form-options
 // @access  Private
-const getFormOptions = asyncHandler(async (req, res) => {
+const getFormOptions = catchAsync(async (req, res) => {
   const options = {
     suggestionTypes: [
       { value: 'missing_presentation', label: 'Missing Research Presentation', description: 'Add a presentation that was given but not in our database' },
@@ -298,7 +298,7 @@ const getFormOptions = asyncHandler(async (req, res) => {
 // @desc    Get all suggestions for admin dashboard
 // @route   GET /api/admin/suggestions
 // @access  Private (Admin only)
-const getAdminDashboard = asyncHandler(async (req, res) => {
+const getAdminDashboard = catchAsync(async (req, res) => {
   const { status, priority, category, suggestionType, limit = 50, page = 1 } = req.query;
 
   const filters = {};
@@ -334,7 +334,7 @@ const getAdminDashboard = asyncHandler(async (req, res) => {
 // @desc    Review suggestion (approve/reject)
 // @route   PUT /api/admin/suggestions/:id/review
 // @access  Private (Admin only)
-const reviewSuggestion = asyncHandler(async (req, res) => {
+const reviewSuggestion = catchAsync(async (req, res) => {
   const suggestionId = req.params.id;
   const reviewerId = req.user._id;
   const { action, notes } = req.body; // action: 'approve' or 'reject'
@@ -387,7 +387,7 @@ const reviewSuggestion = asyncHandler(async (req, res) => {
 // @desc    Mark suggestion as implemented
 // @route   PUT /api/admin/suggestions/:id/implement
 // @access  Private (Admin only)
-const implementSuggestion = asyncHandler(async (req, res) => {
+const implementSuggestion = catchAsync(async (req, res) => {
   const suggestionId = req.params.id;
   const implementerId = req.user._id;
   const { notes, impact } = req.body;

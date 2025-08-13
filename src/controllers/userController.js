@@ -1,11 +1,11 @@
 const userService = require('../services/userService');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const mongoose = require('mongoose');
 
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Public
-const getAllUsers = asyncHandler(async (req, res) => {
+const getAllUsers = catchAsync(async (req, res) => {
   const users = await userService.getAllUsers();
   res.status(200).json({
     success: true,
@@ -17,7 +17,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @desc    Get single user
 // @route   GET /api/users/:id
 // @access  Public
-const getUserById = asyncHandler(async (req, res) => {
+const getUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
   
   // Check if ID is valid MongoDB ObjectId
@@ -46,7 +46,7 @@ const getUserById = asyncHandler(async (req, res) => {
 // @desc    Create new user
 // @route   POST /api/users
 // @access  Public
-const createUser = asyncHandler(async (req, res) => {
+const createUser = catchAsync(async (req, res) => {
   const user = await userService.createUser(req.body);
   
   res.status(201).json({
@@ -58,7 +58,7 @@ const createUser = asyncHandler(async (req, res) => {
 // @desc    Update user
 // @route   PUT /api/users/:id
 // @access  Public
-const updateUser = asyncHandler(async (req, res) => {
+const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   
   // Check if ID is valid MongoDB ObjectId
@@ -87,7 +87,7 @@ const updateUser = asyncHandler(async (req, res) => {
 // @desc    Get user public profile
 // @route   GET /api/users/:id/public
 // @access  Public
-const getUserPublicProfile = asyncHandler(async (req, res) => {
+const getUserPublicProfile = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { includeSubmissions = 'false', includeStats = 'false' } = req.query;
   
@@ -173,7 +173,7 @@ const getUserRoleInSubmission = (userId, submission) => {
 // @desc    Get current user's research submissions
 // @route   GET /api/users/me/submissions
 // @access  Private
-const getMySubmissions = asyncHandler(async (req, res) => {
+const getMySubmissions = catchAsync(async (req, res) => {
   const { status, page = 1, limit = 10 } = req.query;
   const userId = req.user.id;
   
@@ -225,7 +225,7 @@ const getMySubmissions = asyncHandler(async (req, res) => {
 // @desc    Get current user's submission statistics
 // @route   GET /api/users/me/stats
 // @access  Private
-const getMyStats = asyncHandler(async (req, res) => {
+const getMyStats = catchAsync(async (req, res) => {
   try {
     const stats = await req.user.getSubmissionStats();
     
@@ -255,7 +255,7 @@ const isUserPresenter = (userId, submission) => {
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 // @access  Public
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   
   // Check if ID is valid MongoDB ObjectId

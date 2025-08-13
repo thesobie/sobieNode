@@ -1,13 +1,13 @@
 const userService = require('../services/userService');
 const photoUploadService = require('../services/photoUploadService');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const { authMiddleware, requireEmailVerification } = require('../middleware/auth');
 const mongoose = require('mongoose');
 
 // @desc    Get current user's full profile
 // @route   GET /api/profile/me
 // @access  Private
-const getMyProfile = asyncHandler(async (req, res) => {
+const getMyProfile = catchAsync(async (req, res) => {
   // Return full profile data for the authenticated user
   res.status(200).json({
     success: true,
@@ -20,7 +20,7 @@ const getMyProfile = asyncHandler(async (req, res) => {
 // @desc    Update current user's profile
 // @route   PUT /api/profile/me
 // @access  Private
-const updateMyProfile = asyncHandler(async (req, res) => {
+const updateMyProfile = catchAsync(async (req, res) => {
   const userId = req.user._id;
   
   // Prevent updating sensitive fields
@@ -55,7 +55,7 @@ const updateMyProfile = asyncHandler(async (req, res) => {
 // @desc    Get current user's profile summary
 // @route   GET /api/profile/me/summary
 // @access  Private
-const getMyProfileSummary = asyncHandler(async (req, res) => {
+const getMyProfileSummary = catchAsync(async (req, res) => {
   const user = req.user;
   
   const summary = {
@@ -79,7 +79,7 @@ const getMyProfileSummary = asyncHandler(async (req, res) => {
 // @desc    Get public user profile
 // @route   GET /api/profile/:id
 // @access  Public
-const getPublicProfile = asyncHandler(async (req, res) => {
+const getPublicProfile = catchAsync(async (req, res) => {
   const { id } = req.params;
   
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -91,7 +91,15 @@ const getPublicProfile = asyncHandler(async (req, res) => {
   
   const user = await userService.getUserById(id);
   
-  if (!user || !user.isActive) {
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'User not found'
+    });
+  }
+
+  // Allow viewing memorial users even if not active
+  if (!user.isActive && !user.isInMemoriam) {
     return res.status(404).json({
       success: false,
       message: 'User not found'
@@ -110,7 +118,7 @@ const getPublicProfile = asyncHandler(async (req, res) => {
 // @desc    Update user privacy settings
 // @route   PUT /api/profile/me/privacy
 // @access  Private
-const updatePrivacySettings = asyncHandler(async (req, res) => {
+const updatePrivacySettings = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { privacySettings } = req.body;
   
@@ -135,7 +143,7 @@ const updatePrivacySettings = asyncHandler(async (req, res) => {
 // @desc    Upload profile photo
 // @route   POST /api/profile/me/photo
 // @access  Private
-const uploadProfilePhoto = asyncHandler(async (req, res) => {
+const uploadProfilePhoto = catchAsync(async (req, res) => {
   const userId = req.user._id;
   
   // Validate uploaded file
@@ -254,7 +262,7 @@ const uploadProfilePhoto = asyncHandler(async (req, res) => {
 // @desc    Remove profile photo
 // @route   DELETE /api/profile/me/photo
 // @access  Private
-const removeProfilePhoto = asyncHandler(async (req, res) => {
+const removeProfilePhoto = catchAsync(async (req, res) => {
   const userId = req.user._id;
   
   try {
@@ -308,7 +316,7 @@ const removeProfilePhoto = asyncHandler(async (req, res) => {
 // @desc    Get nametag information
 // @route   GET /api/profile/:id/nametag
 // @access  Public
-const getNametagInfo = asyncHandler(async (req, res) => {
+const getNametagInfo = catchAsync(async (req, res) => {
   const { id } = req.params;
   
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -347,7 +355,7 @@ const getNametagInfo = asyncHandler(async (req, res) => {
 // @desc    Search user profiles
 // @route   GET /api/profiles/search
 // @access  Public
-const searchProfiles = asyncHandler(async (req, res) => {
+const searchProfiles = catchAsync(async (req, res) => {
   const { organization, department, userType, studentLevel, role, q, limit = 50, page = 1 } = req.query;
   
   let filter = { isActive: true };
@@ -413,7 +421,7 @@ const searchProfiles = asyncHandler(async (req, res) => {
 // @desc    Get conference statistics
 // @route   GET /api/profiles/stats
 // @access  Public
-const getConferenceStats = asyncHandler(async (req, res) => {
+const getConferenceStats = catchAsync(async (req, res) => {
   const User = require('../models/User');
   
   const [userStats, roleStats, recentActivity] = await Promise.all([
@@ -512,7 +520,7 @@ const getConferenceStats = asyncHandler(async (req, res) => {
 // @desc    Get user's SOBIE history
 // @route   GET /api/profile/me/sobie-history
 // @access  Private
-const getMySobieHistory = asyncHandler(async (req, res) => {
+const getMySobieHistory = catchAsync(async (req, res) => {
   const user = req.user;
   const userId = req.user._id;
   
@@ -632,7 +640,7 @@ const getMySobieHistory = asyncHandler(async (req, res) => {
 // @desc    Update user's SOBIE history
 // @route   PUT /api/profile/me/sobie-history
 // @access  Private
-const updateMySobieHistory = asyncHandler(async (req, res) => {
+const updateMySobieHistory = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { sobieHistory } = req.body;
   
@@ -657,7 +665,7 @@ const updateMySobieHistory = asyncHandler(async (req, res) => {
 // @desc    Add single item to SOBIE history
 // @route   POST /api/profile/me/sobie-history/:type
 // @access  Private
-const addSobieHistoryItem = asyncHandler(async (req, res) => {
+const addSobieHistoryItem = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { type } = req.params; // attendance, service, or publications
   const itemData = req.body;
@@ -694,7 +702,7 @@ const addSobieHistoryItem = asyncHandler(async (req, res) => {
 // @desc    Run content moderation check on profile
 // @route   POST /api/profile/me/content-check
 // @access  Private
-const runContentModerationCheck = asyncHandler(async (req, res) => {
+const runContentModerationCheck = catchAsync(async (req, res) => {
   const user = req.user;
   
   const moderationResult = user.runContentModerationCheck();
@@ -715,7 +723,7 @@ const runContentModerationCheck = asyncHandler(async (req, res) => {
 // @desc    Get photo upload configuration and status
 // @route   GET /api/profile/me/photo/config
 // @access  Private
-const getPhotoUploadConfig = asyncHandler(async (req, res) => {
+const getPhotoUploadConfig = catchAsync(async (req, res) => {
   const config = photoUploadService.checkStorageConfig();
   
   res.status(200).json({
@@ -736,7 +744,7 @@ const getPhotoUploadConfig = asyncHandler(async (req, res) => {
 // @desc    Get profile completeness status
 // @route   GET /api/profile/me/completeness
 // @access  Private
-const getProfileCompleteness = asyncHandler(async (req, res) => {
+const getProfileCompleteness = catchAsync(async (req, res) => {
   const user = req.user;
   const completeness = calculateProfileCompleteness(user);
   

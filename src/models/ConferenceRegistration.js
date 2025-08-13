@@ -169,6 +169,54 @@ const conferenceRegistrationSchema = new mongoose.Schema({
     }
   },
 
+  // Venue and Accommodation Preferences (San Destin Resort)
+  accommodationPreference: {
+    type: {
+      type: String,
+      enum: ['on-resort', 'off-resort', 'undecided'],
+      default: 'undecided'
+    },
+    roomType: {
+      type: String,
+      enum: ['hotel', 'condo', 'vacation_rental', 'unspecified'],
+      default: 'unspecified'
+    },
+    specialRequests: {
+      type: String,
+      maxlength: 500
+    },
+    discountCodeUsed: {
+      type: Boolean,
+      default: false
+    },
+    discountCodesApplied: [{
+      code: String,
+      type: {
+        type: String,
+        enum: ['group_rate', 'early_bird', 'student']
+      },
+      appliedAt: {
+        type: Date,
+        default: Date.now
+      }
+    }],
+    bookingConfirmation: {
+      confirmationNumber: String,
+      bookingDate: Date,
+      checkInDate: Date,
+      checkOutDate: Date,
+      guestsCount: {
+        type: Number,
+        min: 1,
+        default: 1
+      }
+    },
+    updatedAt: {
+      type: Date,
+      default: Date.now
+    }
+  },
+
   // Additional Information
   additionalInfo: {
     firstTimeAttendee: {

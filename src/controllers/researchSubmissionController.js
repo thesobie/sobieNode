@@ -4,7 +4,7 @@ const Conference = require('../models/Conference');
 const Document = require('../models/Document');
 const notificationService = require('../services/notificationService');
 const emailService = require('../services/emailService');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs').promises;
@@ -42,7 +42,7 @@ const upload = multer({
 // @desc    Create new research submission
 // @route   POST /api/research-submission
 // @access  Private
-const createSubmission = asyncHandler(async (req, res) => {
+const createSubmission = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const {
     title,
@@ -110,7 +110,7 @@ const createSubmission = asyncHandler(async (req, res) => {
 // @desc    Upload paper file for submission
 // @route   POST /api/research-submission/:id/upload-paper
 // @access  Private
-const uploadPaper = asyncHandler(async (req, res) => {
+const uploadPaper = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
 
@@ -199,7 +199,7 @@ const uploadPaper = asyncHandler(async (req, res) => {
 // @desc    Submit research for review
 // @route   POST /api/research-submission/:id/submit
 // @access  Private
-const submitForReview = asyncHandler(async (req, res) => {
+const submitForReview = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
 
@@ -291,7 +291,7 @@ const submitForReview = asyncHandler(async (req, res) => {
 // @desc    Get user's research submissions
 // @route   GET /api/research-submission/my-submissions
 // @access  Private
-const getMySubmissions = asyncHandler(async (req, res) => {
+const getMySubmissions = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { status, year } = req.query;
 
@@ -340,7 +340,7 @@ const getMySubmissions = asyncHandler(async (req, res) => {
 // @desc    Get submission details
 // @route   GET /api/research-submission/:id
 // @access  Private
-const getSubmissionDetails = asyncHandler(async (req, res) => {
+const getSubmissionDetails = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
 
@@ -401,7 +401,7 @@ const getSubmissionDetails = asyncHandler(async (req, res) => {
 // @desc    Get submissions assigned for review
 // @route   GET /api/research-submission/for-review
 // @access  Private
-const getSubmissionsForReview = asyncHandler(async (req, res) => {
+const getSubmissionsForReview = catchAsync(async (req, res) => {
   const reviewerId = req.user._id;
   const { status } = req.query;
 
@@ -440,7 +440,7 @@ const getSubmissionsForReview = asyncHandler(async (req, res) => {
 // @desc    Accept or decline review invitation
 // @route   POST /api/research-submission/:id/review-response
 // @access  Private
-const respondToReviewInvitation = asyncHandler(async (req, res) => {
+const respondToReviewInvitation = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const reviewerId = req.user._id;
   const { response } = req.body; // 'accept' or 'decline'
@@ -508,7 +508,7 @@ const respondToReviewInvitation = asyncHandler(async (req, res) => {
 // @desc    Submit review
 // @route   POST /api/research-submission/:id/submit-review
 // @access  Private
-const submitReview = asyncHandler(async (req, res) => {
+const submitReview = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const reviewerId = req.user._id;
   const {
@@ -619,7 +619,7 @@ const submitReview = asyncHandler(async (req, res) => {
 // @desc    Get user's notification preferences for research submissions
 // @route   GET /api/research-submission/notification-preferences
 // @access  Private
-const getNotificationPreferences = asyncHandler(async (req, res) => {
+const getNotificationPreferences = catchAsync(async (req, res) => {
   const userId = req.user._id;
 
   const submissions = await ResearchSubmission.find({
@@ -649,7 +649,7 @@ const getNotificationPreferences = asyncHandler(async (req, res) => {
 // @desc    Update notification preferences
 // @route   PUT /api/research-submission/:id/notification-preferences
 // @access  Private
-const updateNotificationPreferences = asyncHandler(async (req, res) => {
+const updateNotificationPreferences = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
   const { statusUpdates, reviewUpdates, deadlineReminders } = req.body;
@@ -692,7 +692,7 @@ const updateNotificationPreferences = asyncHandler(async (req, res) => {
 // @desc    Update presenter availability for conference
 // @route   PUT /api/research-submission/:id/presenter-availability
 // @access  Private
-const updatePresenterAvailability = asyncHandler(async (req, res) => {
+const updatePresenterAvailability = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
   const availabilityData = req.body;
@@ -768,7 +768,7 @@ const updatePresenterAvailability = asyncHandler(async (req, res) => {
 // @desc    Get presenter availability for conference
 // @route   GET /api/research-submission/:id/presenter-availability
 // @access  Private
-const getPresenterAvailability = asyncHandler(async (req, res) => {
+const getPresenterAvailability = catchAsync(async (req, res) => {
   const submissionId = req.params.id;
   const userId = req.user._id;
 

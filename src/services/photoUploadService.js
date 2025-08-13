@@ -5,6 +5,7 @@ const fs = require('fs').promises;
 const { v4: uuidv4 } = require('uuid');
 const AWS = require('aws-sdk');
 const cloudinary = require('cloudinary').v2;
+const logger = require('../config/logger');
 
 /**
  * Photo Upload Service
@@ -165,7 +166,12 @@ const generateImageSizes = async (buffer, baseFilename) => {
         dimensions: dimensions
       };
     } catch (error) {
-      console.error(`Failed to generate ${sizeName} size:`, error);
+      logger.error('Failed to generate image size', { 
+        sizeName, 
+        error: error.message,
+        service: 'PhotoUploadService',
+        method: 'processImage'
+      });
     }
   }
   
@@ -296,7 +302,12 @@ const deletePhoto = async (photoData) => {
         break;
     }
   } catch (error) {
-    console.error('Error deleting photo:', error);
+    logger.error('Error deleting photo', { 
+      error: error.message,
+      photoData,
+      service: 'PhotoUploadService',
+      method: 'deletePhoto'
+    });
     // Don't throw error for deletion failures
   }
 };

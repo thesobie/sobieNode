@@ -1,0 +1,70 @@
+# GitHub Pages Configuration for SOBIE Conference API Documentation
+title: SOBIE Conference API Documentation
+description: Comprehensive documentation for the SOBIE Conference management system backend
+url: "https://thesobie.github.io"
+baseurl: "/sobieNode"
+
+# Theme
+theme: minima
+remote_theme: pages-themes/minimal@v0.2.0
+
+# Plugins
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+# Markdown settings
+markdown: kramdown
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+  syntax_highlighter_opts:
+    css_class: 'highlight'
+
+# Navigation
+header_pages:
+  - README.md
+  - BACKEND-ASSESSMENT.md
+  - PROJECT_STATUS_FINAL.md
+  - DUAL_ROLE_SYSTEM.md
+  - DIRECTORY_ORGANIZATION.md
+
+# Site metadata
+author: SOBIE Conference
+email: info@sobieconference.org
+github_username: thesobie
+
+# Build settings
+highlighter: rouge
+show_excerpts: true
+future: true
+
+# Exclude from processing
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - node_modules
+  - vendor/bundle/
+  - vendor/cache/
+  - vendor/gems/
+  - vendor/ruby/
+
+# Collections
+collections:
+  docs:
+    output: true
+    permalink: /:collection/:name/
+
+# Defaults
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+  - scope:
+      path: ""
+      type: "docs"
+    values:
+      layout: "default"

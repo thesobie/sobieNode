@@ -1,12 +1,12 @@
 const userService = require('../services/userService');
 const notificationService = require('../services/notificationService');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const mongoose = require('mongoose');
 
 // @desc    Get all users with filtering and pagination (Admin only)
 // @route   GET /api/admin/users
 // @access  Admin
-const getAllUsers = asyncHandler(async (req, res) => {
+const getAllUsers = catchAsync(async (req, res) => {
   const { 
     page = 1, 
     limit = 50, 
@@ -98,7 +98,7 @@ const getAllUsers = asyncHandler(async (req, res) => {
 // @desc    Get detailed user by ID (Admin only)
 // @route   GET /api/admin/users/:id
 // @access  Admin
-const getUserById = asyncHandler(async (req, res) => {
+const getUserById = catchAsync(async (req, res) => {
   const { id } = req.params;
 
   if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -129,7 +129,7 @@ const getUserById = asyncHandler(async (req, res) => {
 // @desc    Create new user manually (Admin only)
 // @route   POST /api/admin/users
 // @access  Admin
-const createUser = asyncHandler(async (req, res) => {
+const createUser = catchAsync(async (req, res) => {
   const userData = req.body;
 
   // Admin can bypass email verification
@@ -161,7 +161,7 @@ const createUser = asyncHandler(async (req, res) => {
 // @desc    Update user (Admin only)
 // @route   PUT /api/admin/users/:id
 // @access  Admin
-const updateUser = asyncHandler(async (req, res) => {
+const updateUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const updateData = req.body;
 
@@ -193,7 +193,7 @@ const updateUser = asyncHandler(async (req, res) => {
 // @desc    Delete/deactivate user (Admin only)
 // @route   DELETE /api/admin/users/:id
 // @access  Admin
-const deleteUser = asyncHandler(async (req, res) => {
+const deleteUser = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { permanent = false } = req.query;
 
@@ -248,7 +248,7 @@ const deleteUser = asyncHandler(async (req, res) => {
 // @desc    Assign/remove roles from user (Admin only)
 // @route   PUT /api/admin/users/:id/roles
 // @access  Admin
-const updateUserRoles = asyncHandler(async (req, res) => {
+const updateUserRoles = catchAsync(async (req, res) => {
   const { id } = req.params;
   const { roles, action = 'set' } = req.body; // action: 'set', 'add', 'remove'
 
@@ -324,7 +324,7 @@ const updateUserRoles = asyncHandler(async (req, res) => {
 // @desc    Bulk update users (Admin only)
 // @route   PUT /api/admin/users/bulk
 // @access  Admin
-const bulkUpdateUsers = asyncHandler(async (req, res) => {
+const bulkUpdateUsers = catchAsync(async (req, res) => {
   const { userIds, updateData } = req.body;
 
   if (!Array.isArray(userIds) || userIds.length === 0) {
@@ -374,7 +374,7 @@ const bulkUpdateUsers = asyncHandler(async (req, res) => {
 // @desc    Send notification to users (Admin only)
 // @route   POST /api/admin/notifications/send
 // @access  Admin
-const sendNotification = asyncHandler(async (req, res) => {
+const sendNotification = catchAsync(async (req, res) => {
   const { 
     recipients, // 'all', 'filtered', or array of user IDs
     filters, // filters for 'filtered' option
@@ -454,7 +454,7 @@ const sendNotification = asyncHandler(async (req, res) => {
 // @desc    Get admin dashboard statistics (Admin only)
 // @route   GET /api/admin/dashboard/stats
 // @access  Admin
-const getDashboardStats = asyncHandler(async (req, res) => {
+const getDashboardStats = catchAsync(async (req, res) => {
   const User = require('../models/User');
   
   const [
@@ -542,7 +542,7 @@ const getDashboardStats = asyncHandler(async (req, res) => {
 // @desc    Export users data (Admin only)
 // @route   GET /api/admin/users/export
 // @access  Admin
-const exportUsers = asyncHandler(async (req, res) => {
+const exportUsers = catchAsync(async (req, res) => {
   const { format = 'json', filters = {} } = req.query;
 
   const User = require('../models/User');
@@ -590,6 +590,133 @@ const exportUsers = asyncHandler(async (req, res) => {
   }
 });
 
+// Memorial Management Functions
+
+// @desc    Get all memorial users
+// @route   GET /api/admin/memorial/users
+// @access  Admin
+const getMemorialUsers = catchAsync(async (req, res) => {
+  const { year } = req.query;
+  const options = year ? { year: parseInt(year) } : {};
+  
+  const User = require('../models/User');
+  const memorialUsers = await User.findMemorialUsers(options);
+  
+  res.status(200).json({
+    success: true,
+    count: memorialUsers.length,
+    data: memorialUsers
+  });
+});
+
+// @desc    Add memorial status to a user
+// @route   POST /api/admin/memorial/:userId/add
+// @access  Admin
+const addMemorialStatus = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { dateOfPassing, memorialNote } = req.body;
+  const adminId = req.user.id;
+  
+  const User = require('../models/User');
+  const user = await User.addMemorialStatus(userId, {
+    dateOfPassing,
+    memorialNote
+  }, adminId);
+  
+  res.status(200).json({
+    success: true,
+    message: 'Memorial status added successfully',
+    data: {
+      user: {
+        id: user._id,
+        name: `${user.name.first} ${user.name.last}`,
+        memorial: user.memorial,
+        roles: user.roles
+      }
+    }
+  });
+});
+
+// @desc    Update memorial information
+// @route   PUT /api/admin/memorial/:userId/update
+// @access  Admin
+const updateMemorialInfo = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const { dateOfPassing, memorialNote } = req.body;
+  
+  const User = require('../models/User');
+  const user = await User.findById(userId);
+  
+  if (!user) {
+    return res.status(404).json({
+      success: false,
+      message: 'User not found'
+    });
+  }
+  
+  if (!user.roles.includes('in-memoriam')) {
+    return res.status(400).json({
+      success: false,
+      message: 'User does not have memorial status'
+    });
+  }
+  
+  // Update memorial information
+  user.memorial.dateOfPassing = dateOfPassing;
+  user.memorial.memorialNote = memorialNote;
+  
+  await user.save();
+  
+  res.status(200).json({
+    success: true,
+    message: 'Memorial information updated successfully',
+    data: {
+      user: {
+        id: user._id,
+        name: `${user.name.first} ${user.name.last}`,
+        memorial: user.memorial,
+        roles: user.roles
+      }
+    }
+  });
+});
+
+// @desc    Remove memorial status from a user
+// @route   DELETE /api/admin/memorial/:userId/remove
+// @access  Admin
+const removeMemorialStatus = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  
+  const User = require('../models/User');
+  const user = await User.removeMemorialStatus(userId);
+  
+  res.status(200).json({
+    success: true,
+    message: 'Memorial status removed successfully',
+    data: {
+      user: {
+        id: user._id,
+        name: `${user.name.first} ${user.name.last}`,
+        roles: user.roles,
+        isActive: user.isActive
+      }
+    }
+  });
+});
+
+// @desc    Get memorial statistics
+// @route   GET /api/admin/memorial/stats
+// @access  Admin
+const getMemorialStats = catchAsync(async (req, res) => {
+  const User = require('../models/User');
+  const stats = await User.getMemorialStats();
+  
+  res.status(200).json({
+    success: true,
+    data: stats.length > 0 ? stats[0] : { totalMemorialUsers: 0, byYear: {} }
+  });
+});
+
 module.exports = {
   getAllUsers,
   getUserById,
@@ -600,5 +727,11 @@ module.exports = {
   bulkUpdateUsers,
   sendNotification,
   getDashboardStats,
-  exportUsers
+  exportUsers,
+  // Memorial management
+  getMemorialUsers,
+  addMemorialStatus,
+  removeMemorialStatus,
+  updateMemorialInfo,
+  getMemorialStats
 };

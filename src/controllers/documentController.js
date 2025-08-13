@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs').promises;
 const crypto = require('crypto');
 const Document = require('../models/Document');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 
 // Configure multer for PDF uploads
 const storage = multer.diskStorage({
@@ -53,7 +53,7 @@ const calculateChecksum = async (filePath) => {
 // @desc    Upload a new document
 // @route   POST /api/documents/upload
 // @access  Private (organizer/admin)
-const uploadDocument = asyncHandler(async (req, res) => {
+const uploadDocument = catchAsync(async (req, res) => {
   upload.single('document')(req, res, async (err) => {
     if (err) {
       if (err instanceof multer.MulterError) {
@@ -164,7 +164,7 @@ const uploadDocument = asyncHandler(async (req, res) => {
 // @desc    Get all documents with filtering
 // @route   GET /api/documents
 // @access  Public/Private (based on document permissions)
-const getDocuments = asyncHandler(async (req, res) => {
+const getDocuments = catchAsync(async (req, res) => {
   const {
     conferenceYear,
     category,
@@ -242,7 +242,7 @@ const getDocuments = asyncHandler(async (req, res) => {
 // @desc    Get single document details
 // @route   GET /api/documents/:id
 // @access  Public/Private (based on document permissions)
-const getDocument = asyncHandler(async (req, res) => {
+const getDocument = catchAsync(async (req, res) => {
   const document = await Document.findById(req.params.id)
     .populate('uploadedBy', 'name.firstName name.lastName email');
 
@@ -270,7 +270,7 @@ const getDocument = asyncHandler(async (req, res) => {
 // @desc    Download document file
 // @route   GET /api/documents/:id/download
 // @access  Public/Private (based on document permissions)
-const downloadDocument = asyncHandler(async (req, res) => {
+const downloadDocument = catchAsync(async (req, res) => {
   const document = await Document.findById(req.params.id);
 
   if (!document || document.status !== 'active') {
@@ -318,7 +318,7 @@ const downloadDocument = asyncHandler(async (req, res) => {
 // @desc    Update document metadata
 // @route   PUT /api/documents/:id
 // @access  Private (uploader/admin/organizer)
-const updateDocument = asyncHandler(async (req, res) => {
+const updateDocument = catchAsync(async (req, res) => {
   const document = await Document.findById(req.params.id);
 
   if (!document) {
@@ -370,7 +370,7 @@ const updateDocument = asyncHandler(async (req, res) => {
 // @desc    Delete document
 // @route   DELETE /api/documents/:id
 // @access  Private (uploader/admin/organizer)
-const deleteDocument = asyncHandler(async (req, res) => {
+const deleteDocument = catchAsync(async (req, res) => {
   const document = await Document.findById(req.params.id);
 
   if (!document) {
@@ -422,7 +422,7 @@ const deleteDocument = asyncHandler(async (req, res) => {
 // @desc    Get document statistics
 // @route   GET /api/documents/stats
 // @access  Private (admin/organizer)
-const getDocumentStats = asyncHandler(async (req, res) => {
+const getDocumentStats = catchAsync(async (req, res) => {
   const stats = await Document.aggregate([
     { $match: { status: 'active' } },
     {

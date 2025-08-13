@@ -1,4 +1,4 @@
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const BugReport = require('../models/BugReport');
 const User = require('../models/User');
 const githubService = require('../services/githubService');
@@ -8,7 +8,7 @@ const Notification = require('../models/Notification');
 // @desc    Submit a bug report
 // @route   POST /api/bug-reports
 // @access  Private
-const submitBugReport = asyncHandler(async (req, res) => {
+const submitBugReport = catchAsync(async (req, res) => {
   const reporterId = req.user._id;
   const {
     title,
@@ -131,7 +131,7 @@ const submitBugReport = asyncHandler(async (req, res) => {
 // @desc    Get user's bug reports
 // @route   GET /api/bug-reports/my-reports
 // @access  Private
-const getMyBugReports = asyncHandler(async (req, res) => {
+const getMyBugReports = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const {
     status,
@@ -178,7 +178,7 @@ const getMyBugReports = asyncHandler(async (req, res) => {
 // @desc    Get specific bug report
 // @route   GET /api/bug-reports/:reportId
 // @access  Private
-const getBugReport = asyncHandler(async (req, res) => {
+const getBugReport = catchAsync(async (req, res) => {
   const { reportId } = req.params;
   const userId = req.user._id;
 
@@ -216,7 +216,7 @@ const getBugReport = asyncHandler(async (req, res) => {
 // @desc    Update bug report status (Admin only)
 // @route   PUT /api/bug-reports/:reportId/status
 // @access  Private (Admin/Editor)
-const updateBugReportStatus = asyncHandler(async (req, res) => {
+const updateBugReportStatus = catchAsync(async (req, res) => {
   const { reportId } = req.params;
   const { status, resolution, assignedTo } = req.body;
 
@@ -305,7 +305,7 @@ const updateBugReportStatus = asyncHandler(async (req, res) => {
 // @desc    Get all bug reports (Admin only)
 // @route   GET /api/bug-reports/admin/all
 // @access  Private (Admin/Editor)
-const getAllBugReports = asyncHandler(async (req, res) => {
+const getAllBugReports = catchAsync(async (req, res) => {
   // Check admin permissions
   if (!req.user.hasRole('admin') && !req.user.hasRole('editor')) {
     return res.status(403).json({
@@ -373,7 +373,7 @@ const getAllBugReports = asyncHandler(async (req, res) => {
 // @desc    Get bug report statistics (Admin only)
 // @route   GET /api/bug-reports/admin/statistics
 // @access  Private (Admin)
-const getBugReportStatistics = asyncHandler(async (req, res) => {
+const getBugReportStatistics = catchAsync(async (req, res) => {
   // Check admin permissions
   if (!req.user.hasRole('admin')) {
     return res.status(403).json({
@@ -435,7 +435,7 @@ const getBugReportStatistics = asyncHandler(async (req, res) => {
 // @desc    Test GitHub integration
 // @route   GET /api/bug-reports/admin/github-status
 // @access  Private (Admin)
-const getGitHubStatus = asyncHandler(async (req, res) => {
+const getGitHubStatus = catchAsync(async (req, res) => {
   // Check admin permissions
   if (!req.user.hasRole('admin')) {
     return res.status(403).json({

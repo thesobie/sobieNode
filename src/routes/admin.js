@@ -10,7 +10,13 @@ const {
   bulkUpdateUsers,
   sendNotification,
   getDashboardStats,
-  exportUsers
+  exportUsers,
+  // Memorial management
+  getMemorialUsers,
+  addMemorialStatus,
+  removeMemorialStatus,
+  updateMemorialInfo,
+  getMemorialStats
 } = require('../controllers/adminController');
 const { authMiddleware, requireRole } = require('../middleware/auth');
 const { 
@@ -18,6 +24,7 @@ const {
   validateUserUpdate,
   validateBulkUpdate,
   validateNotification,
+  validateMemorialData,
   handleValidationErrors
 } = require('../middleware/adminValidation');
 
@@ -44,5 +51,12 @@ router.put('/users/bulk', validateBulkUpdate, handleValidationErrors, bulkUpdate
 
 // Notifications
 router.post('/notifications/send', validateNotification, handleValidationErrors, sendNotification);
+
+// Memorial management routes
+router.get('/memorial/users', getMemorialUsers);
+router.get('/memorial/stats', getMemorialStats);
+router.post('/memorial/:userId/add', validateMemorialData, handleValidationErrors, addMemorialStatus);
+router.put('/memorial/:userId/update', validateMemorialData, handleValidationErrors, updateMemorialInfo);
+router.delete('/memorial/:userId/remove', removeMemorialStatus);
 
 module.exports = router;

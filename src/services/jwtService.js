@@ -2,14 +2,19 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 
 class JWTService {
-  constructor() {
-    this.secretKey = process.env.JWT_SECRET;
-    this.refreshSecretKey = process.env.JWT_REFRESH_SECRET;
-    this.tokenExpiry = process.env.JWT_EXPIRE || '15m';
-    this.refreshTokenExpiry = process.env.JWT_REFRESH_EXPIRE || '7d';
+  constructor(config = null) {
+    // Allow dependency injection for testing, otherwise load config
+    if (!config) {
+      config = require('../config/environment');
+    }
+    
+    this.secretKey = config.jwt.secret;
+    this.refreshSecretKey = config.jwt.refreshSecret;
+    this.tokenExpiry = config.jwt.expiresIn;
+    this.refreshTokenExpiry = config.jwt.refreshExpiresIn;
     
     if (!this.secretKey) {
-      throw new Error('JWT_SECRET environment variable is required');
+      throw new Error('JWT secret is required in configuration');
     }
   }
 

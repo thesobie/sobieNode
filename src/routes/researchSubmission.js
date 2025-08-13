@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const researchSubmissionController = require('../controllers/researchSubmissionController');
 const adminResearchController = require('../controllers/adminResearchController');
-const { authMiddleware, requireAdmin } = require('../mid// @route   GET /api/research-submission/admin/statistics
+const { authMiddleware, requireAdmin } = require('../middleware/auth');
+const { body, param, query } = require('express-validator');
+const { validationMiddleware } = require('../middleware/validation');
 // @desc    Get submission statistics for admin dashboard
 // @access  Private/Admin
 router.get('/admin/statistics',
@@ -37,9 +39,8 @@ router.get('/admin/conflicts/:day/:period',
   adminResearchController.getConflictsForTimeSlot
 );
 
-module.exports = router;');
-const { body, param, query } = require('express-validator');
-const { validationMiddleware } = require('../middleware/validation');
+
+
 
 // Validation rules
 const createSubmissionValidation = [

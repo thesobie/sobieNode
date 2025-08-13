@@ -1,0 +1,28 @@
+{
+  "migrationDate": "2025-08-12T22:55:32.418Z",
+  "conference": "undefined (2023)",
+  "statistics": {
+    "conferenceCreated": 0,
+    "usersCreated": 0,
+    "usersUpdated": 0,
+    "registrationsCreated": 0,
+    "sessionsCreated": 0,
+    "researchSubmissionsCreated": 0,
+    "totalRecordsCreated": 0,
+    "errorCount": 270
+  },
+  "successRate": 0,
+  "errors": [
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function",
+    "User creation ([object Object]): name.toLowerCase is not a function"
+  ],
+  "totalErrors": 270
+}

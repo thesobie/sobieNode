@@ -19,6 +19,10 @@ const programBuilderRoutes = require('./programBuilderRoutes');
 const communityRoutes = require('./communityRoutes');
 const communicationRoutes = require('./communication');
 const bugReportRoutes = require('./bugReports');
+const nameCardRoutes = require('./nameCardRoutes');
+const venueRoutes = require('./venueRoutes');
+const programParserRoutes = require('./programParserRoutes');
+const historicalDataRoutes = require('./historicalData');
 
 // Mount routes
 router.use('/users', userRoutes);
@@ -26,8 +30,11 @@ router.use('/auth', authRoutes);
 router.use('/profiles', profileRoutes);
 router.use('/admin', adminRoutes);
 router.use('/admin', adminSuggestionRoutes);
+router.use('/admin/name-cards', nameCardRoutes);
+router.use('/admin', programParserRoutes);
+router.use('/venue', venueRoutes);
 router.use('/documents', documentRoutes);
-// router.use('/historical', historicalRoutes); // Temporarily disabled due to issues
+router.use('/historical', historicalDataRoutes);
 router.use('/research', researchRoutes);
 router.use('/research-submission', researchSubmissionRoutes);
 router.use('/coauthors', coAuthorRoutes);
@@ -50,7 +57,7 @@ router.get('/', (req, res) => {
       profiles: '/api/profiles',
       admin: '/api/admin (requires admin role)',
       documents: '/api/documents',
-      historical: '/api/historical',
+      historical: '/api/historical (comprehensive historical data analytics)',
       research: '/api/research',
       researchSubmission: '/api/research-submission',
       coAuthors: '/api/coauthors',
@@ -62,6 +69,9 @@ router.get('/', (req, res) => {
       community: '/api/community (community activities and interests)',
       communications: '/api/communications (messaging and notifications)',
       bugReports: '/api/bug-reports (bug reporting with GitHub integration)',
+      nameCards: '/api/admin/name-cards (admin name card generation)',
+      venue: '/api/venue (San Destin resort booking and accommodation)',
+      programParser: '/api/admin/parse-program (PDF parsing and historical data extraction)',
       health: '/health'
     }
   });

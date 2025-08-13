@@ -284,11 +284,32 @@ const handleValidationErrors = (req, res, next) => {
   next();
 };
 
+// Validation for memorial data
+const validateMemorialData = [
+  body('dateOfPassing')
+    .isISO8601()
+    .toDate()
+    .withMessage('Valid date of passing is required')
+    .custom((value) => {
+      if (value > new Date()) {
+        throw new Error('Date of passing cannot be in the future');
+      }
+      return true;
+    }),
+  
+  body('memorialNote')
+    .optional()
+    .isLength({ max: 500 })
+    .trim()
+    .withMessage('Memorial note must be less than 500 characters'),
+];
+
 module.exports = {
   validateUserCreation,
   validateUserUpdate,
   validateBulkUpdate,
   validateNotification,
   validateUserQuery,
+  validateMemorialData,
   handleValidationErrors
 };

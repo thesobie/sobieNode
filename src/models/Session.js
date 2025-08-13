@@ -65,7 +65,32 @@ const sessionSchema = new mongoose.Schema({
     userId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User'
-    }
+    },
+    bio: String,
+    isConfirmed: {
+      type: Boolean,
+      default: false
+    },
+    responsibilities: {
+      introduction: {
+        type: Boolean,
+        default: true
+      },
+      timeManagement: {
+        type: Boolean,
+        default: true
+      },
+      qaModeration: {
+        type: Boolean,
+        default: true
+      },
+      technicalSupport: {
+        type: Boolean,
+        default: false
+      }
+    },
+    preparationNotes: String,
+    sessionNotes: String
   },
   
   moderators: [{

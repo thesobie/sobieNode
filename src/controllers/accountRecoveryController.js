@@ -1,4 +1,4 @@
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const User = require('../models/User');
 const authService = require('../services/authService');
 const Message = require('../models/Message');
@@ -7,7 +7,7 @@ const Notification = require('../models/Notification');
 // @desc    Search for existing user account by multiple criteria
 // @route   POST /api/auth/find-account
 // @access  Public
-const findAccount = asyncHandler(async (req, res) => {
+const findAccount = catchAsync(async (req, res) => {
   const {
     firstName,
     lastName,
@@ -201,7 +201,7 @@ const findAccount = asyncHandler(async (req, res) => {
 // @desc    Request account recovery for a specific user
 // @route   POST /api/auth/recover-account
 // @access  Public
-const recoverAccount = asyncHandler(async (req, res) => {
+const recoverAccount = catchAsync(async (req, res) => {
   const { userId, email, recoveryMethod = 'magic_link' } = req.body;
 
   if (!userId || !email) {
@@ -276,7 +276,7 @@ const recoverAccount = asyncHandler(async (req, res) => {
 // @desc    Get account recovery options and instructions
 // @route   GET /api/auth/recovery-info
 // @access  Public
-const getRecoveryInfo = asyncHandler(async (req, res) => {
+const getRecoveryInfo = catchAsync(async (req, res) => {
   res.json({
     success: true,
     data: {
@@ -378,7 +378,7 @@ const getRecoveryInfo = asyncHandler(async (req, res) => {
 // @desc    Verify if an email exists in the system (privacy-friendly)
 // @route   POST /api/auth/check-email
 // @access  Public
-const checkEmailExists = asyncHandler(async (req, res) => {
+const checkEmailExists = catchAsync(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {

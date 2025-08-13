@@ -1,11 +1,11 @@
 const authService = require('../services/authService');
 const jwtService = require('../services/jwtService');
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 
 // @desc    Login user with email/password
 // @route   POST /api/auth/login
 // @access  Public
-const login = asyncHandler(async (req, res) => {
+const login = catchAsync(async (req, res) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
@@ -33,7 +33,7 @@ const login = asyncHandler(async (req, res) => {
 // @desc    Request magic link for passwordless login
 // @route   POST /api/auth/magic-link
 // @access  Public
-const requestMagicLink = asyncHandler(async (req, res) => {
+const requestMagicLink = catchAsync(async (req, res) => {
   const { email, method = 'email' } = req.body;
 
   if (!email) {
@@ -58,7 +58,7 @@ const requestMagicLink = asyncHandler(async (req, res) => {
 // @desc    Login with magic link token
 // @route   POST /api/auth/magic-login
 // @access  Public
-const magicLogin = asyncHandler(async (req, res) => {
+const magicLogin = catchAsync(async (req, res) => {
   // Token can come from either body (POST) or query (GET)
   const { token } = req.body.token ? req.body : req.query;
 
@@ -87,7 +87,7 @@ const magicLogin = asyncHandler(async (req, res) => {
 // @desc    Register new user
 // @route   POST /api/auth/register
 // @access  Public
-const register = asyncHandler(async (req, res) => {
+const register = catchAsync(async (req, res) => {
   const result = await authService.register(req.body);
   
   // Set secure cookies for immediate login
@@ -107,7 +107,7 @@ const register = asyncHandler(async (req, res) => {
 // @desc    Refresh access token
 // @route   POST /api/auth/refresh
 // @access  Public
-const refreshToken = asyncHandler(async (req, res) => {
+const refreshToken = catchAsync(async (req, res) => {
   let refreshToken = req.body.refreshToken;
   
   // Try to get refresh token from cookies if not in body
@@ -142,7 +142,7 @@ const refreshToken = asyncHandler(async (req, res) => {
 // @desc    Verify email address
 // @route   POST /api/auth/verify-email
 // @access  Public
-const verifyEmail = asyncHandler(async (req, res) => {
+const verifyEmail = catchAsync(async (req, res) => {
   // Token can come from either body (POST) or query (GET)
   const { token } = req.body.token ? req.body : req.query;
 
@@ -167,7 +167,7 @@ const verifyEmail = asyncHandler(async (req, res) => {
 // @desc    Resend email verification
 // @route   POST /api/auth/resend-verification
 // @access  Public
-const resendEmailVerification = asyncHandler(async (req, res) => {
+const resendEmailVerification = catchAsync(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -188,7 +188,7 @@ const resendEmailVerification = asyncHandler(async (req, res) => {
 // @desc    Request password reset
 // @route   POST /api/auth/forgot-password
 // @access  Public
-const forgotPassword = asyncHandler(async (req, res) => {
+const forgotPassword = catchAsync(async (req, res) => {
   const { email } = req.body;
 
   if (!email) {
@@ -212,7 +212,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
 // @desc    Reset password with token
 // @route   POST /api/auth/reset-password
 // @access  Public
-const resetPassword = asyncHandler(async (req, res) => {
+const resetPassword = catchAsync(async (req, res) => {
   // For GET requests (email links), token comes from query, no password yet
   if (req.method === 'GET') {
     const { token } = req.query;
@@ -385,7 +385,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 // @desc    Change password (authenticated user)
 // @route   PUT /api/auth/change-password
 // @access  Private
-const changePassword = asyncHandler(async (req, res) => {
+const changePassword = catchAsync(async (req, res) => {
   const { currentPassword, newPassword } = req.body;
 
   if (!currentPassword || !newPassword) {
@@ -406,7 +406,7 @@ const changePassword = asyncHandler(async (req, res) => {
 // @desc    Logout user
 // @route   POST /api/auth/logout
 // @access  Private
-const logout = asyncHandler(async (req, res) => {
+const logout = catchAsync(async (req, res) => {
   // Clear authentication cookies
   jwtService.clearAuthCookies(res);
   
@@ -421,7 +421,7 @@ const logout = asyncHandler(async (req, res) => {
 // @desc    Get current user profile
 // @route   GET /api/auth/me
 // @access  Private
-const getMe = asyncHandler(async (req, res) => {
+const getMe = catchAsync(async (req, res) => {
   res.status(200).json({
     success: true,
     data: {
@@ -433,7 +433,7 @@ const getMe = asyncHandler(async (req, res) => {
 // @desc    Validate current session
 // @route   GET /api/auth/validate
 // @access  Public
-const validateSession = asyncHandler(async (req, res) => {
+const validateSession = catchAsync(async (req, res) => {
   let token = jwtService.extractTokenFromHeader(req.header('Authorization'));
   
   if (!token) {

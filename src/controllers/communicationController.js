@@ -1,4 +1,4 @@
-const { asyncHandler } = require('../utils/asyncHandler');
+const { catchAsync } = require('../utils/catchAsync');
 const Message = require('../models/Message');
 const Notification = require('../models/Notification');
 const User = require('../models/User');
@@ -9,7 +9,7 @@ const mongoose = require('mongoose');
 // @desc    Get user's messages inbox
 // @route   GET /api/communications/messages
 // @access  Private
-const getMessages = asyncHandler(async (req, res) => {
+const getMessages = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const {
     type,
@@ -69,7 +69,7 @@ const getMessages = asyncHandler(async (req, res) => {
 // @desc    Get specific message with thread
 // @route   GET /api/communications/messages/:messageId
 // @access  Private
-const getMessage = asyncHandler(async (req, res) => {
+const getMessage = catchAsync(async (req, res) => {
   const { messageId } = req.params;
   const userId = req.user._id;
 
@@ -128,7 +128,7 @@ const getMessage = asyncHandler(async (req, res) => {
 // @desc    Send a new message
 // @route   POST /api/communications/messages
 // @access  Private
-const sendMessage = asyncHandler(async (req, res) => {
+const sendMessage = catchAsync(async (req, res) => {
   const senderId = req.user._id;
   const {
     subject,
@@ -206,7 +206,7 @@ const sendMessage = asyncHandler(async (req, res) => {
 // @desc    Reply to a message
 // @route   POST /api/communications/messages/:messageId/reply
 // @access  Private
-const replyToMessage = asyncHandler(async (req, res) => {
+const replyToMessage = catchAsync(async (req, res) => {
   const { messageId } = req.params;
   const senderId = req.user._id;
   const { content, replyToAll = false } = req.body;
@@ -274,7 +274,7 @@ const replyToMessage = asyncHandler(async (req, res) => {
 // @desc    Create and send announcement
 // @route   POST /api/communications/announcements
 // @access  Private (Admin/Conference roles)
-const sendAnnouncement = asyncHandler(async (req, res) => {
+const sendAnnouncement = catchAsync(async (req, res) => {
   // Check permissions
   if (!req.user.hasRole('admin') && !req.user.hasRole('conference-chairperson') && !req.user.hasRole('editor')) {
     return res.status(403).json({
@@ -358,7 +358,7 @@ const sendAnnouncement = asyncHandler(async (req, res) => {
 // @desc    Create schedule change notification
 // @route   POST /api/communications/schedule-changes
 // @access  Private (Admin/Editor)
-const sendScheduleChangeNotification = asyncHandler(async (req, res) => {
+const sendScheduleChangeNotification = catchAsync(async (req, res) => {
   // Check permissions
   if (!req.user.hasRole('admin') && !req.user.hasRole('editor')) {
     return res.status(403).json({
@@ -460,7 +460,7 @@ const sendScheduleChangeNotification = asyncHandler(async (req, res) => {
 // @desc    Get user's notifications
 // @route   GET /api/communications/notifications
 // @access  Private
-const getNotifications = asyncHandler(async (req, res) => {
+const getNotifications = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const {
     status,
@@ -499,7 +499,7 @@ const getNotifications = asyncHandler(async (req, res) => {
 // @desc    Mark notification as read
 // @route   PUT /api/communications/notifications/:notificationId/read
 // @access  Private
-const markNotificationAsRead = asyncHandler(async (req, res) => {
+const markNotificationAsRead = catchAsync(async (req, res) => {
   const { notificationId } = req.params;
   const userId = req.user._id;
 
@@ -527,7 +527,7 @@ const markNotificationAsRead = asyncHandler(async (req, res) => {
 // @desc    Mark multiple notifications as read
 // @route   PUT /api/communications/notifications/mark-read
 // @access  Private
-const markMultipleNotificationsAsRead = asyncHandler(async (req, res) => {
+const markMultipleNotificationsAsRead = catchAsync(async (req, res) => {
   const userId = req.user._id;
   const { notificationIds } = req.body;
 

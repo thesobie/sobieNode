@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const twilio = require('twilio');
+const logger = require('../config/logger');
 
 class NotificationService {
   constructor() {
@@ -20,7 +21,11 @@ class NotificationService {
           }
         });
       } catch (error) {
-        console.error('Failed to initialize email transporter:', error);
+        logger.error('Failed to initialize email transporter', {
+          error: error.message,
+          host: process.env.SMTP_HOST,
+          port: process.env.SMTP_PORT
+        });
       }
     }
 
@@ -121,7 +126,12 @@ SOBIE Conference Platform
       await this.emailTransporter.sendMail(mailOptions);
       return { success: true, method: 'email' };
     } catch (error) {
-      console.error('Error sending magic link email:', error);
+      logger.error('Error sending magic link email', { 
+        email, 
+        error: error.message,
+        service: 'NotificationService',
+        method: 'sendMagicLinkEmail'
+      });
       throw new Error('Failed to send magic link email');
     }
   }
@@ -144,7 +154,12 @@ SOBIE Conference Platform
       });
       return { success: true, method: 'sms' };
     } catch (error) {
-      console.error('Error sending magic link SMS:', error);
+      logger.error('Error sending magic link SMS', { 
+        phoneNumber, 
+        error: error.message,
+        service: 'NotificationService',
+        method: 'sendMagicLinkSMS'
+      });
       throw new Error('Failed to send magic link SMS');
     }
   }
@@ -229,7 +244,12 @@ SOBIE Conference Platform
       await this.emailTransporter.sendMail(mailOptions);
       return { success: true };
     } catch (error) {
-      console.error('Error sending email verification:', error);
+      logger.error('Error sending email verification', { 
+        email, 
+        error: error.message,
+        service: 'NotificationService',
+        method: 'sendEmailVerification'
+      });
       throw new Error('Failed to send email verification');
     }
   }
@@ -323,7 +343,12 @@ SOBIE Conference Platform
       await this.emailTransporter.sendMail(mailOptions);
       return { success: true };
     } catch (error) {
-      console.error('Error sending password reset email:', error);
+      logger.error('Error sending password reset email', { 
+        email, 
+        error: error.message,
+        service: 'NotificationService',
+        method: 'sendPasswordResetEmail'
+      });
       throw new Error('Failed to send password reset email');
     }
   }
@@ -394,10 +419,22 @@ SOBIE Conference Platform
 
     try {
       const result = await this.emailTransporter.sendMail(mailOptions);
-      console.log(`Custom email sent to ${email}:`, result.messageId);
+      logger.info('Custom email sent successfully', { 
+        email, 
+        messageId: result.messageId,
+        subject,
+        service: 'NotificationService',
+        method: 'sendCustomEmail'
+      });
       return result;
     } catch (error) {
-      console.error(`Failed to send custom email to ${email}:`, error);
+      logger.error('Failed to send custom email', { 
+        email, 
+        error: error.message,
+        subject,
+        service: 'NotificationService',
+        method: 'sendCustomEmail'
+      });
       throw error;
     }
   }
@@ -412,7 +449,11 @@ SOBIE Conference Platform
       await this.emailTransporter.verify();
       return true;
     } catch (error) {
-      console.error('Email configuration test failed:', error);
+      logger.error('Email configuration test failed', { 
+        error: error.message,
+        service: 'NotificationService',
+        method: 'testEmailConfig'
+      });
       return false;
     }
   }
@@ -513,9 +554,20 @@ SOBIE Conference Platform
     
     try {
       await this.emailTransporter.sendMail(mailOptions);
-      console.log(`Proceedings invitation sent to ${recipientEmail}`);
+      logger.info('Proceedings invitation sent successfully', { 
+        recipientEmail,
+        proceedingsTitle,
+        service: 'NotificationService',
+        method: 'sendProceedingsInvitation'
+      });
     } catch (error) {
-      console.error(`Failed to send proceedings invitation to ${recipientEmail}:`, error);
+      logger.error('Failed to send proceedings invitation', { 
+        recipientEmail, 
+        error: error.message,
+        proceedingsTitle,
+        service: 'NotificationService',
+        method: 'sendProceedingsInvitation'
+      });
       throw error;
     }
   }
@@ -595,9 +647,22 @@ SOBIE Conference Platform
     
     try {
       await this.emailTransporter.sendMail(mailOptions);
-      console.log(`Proceedings response notification sent to admin`);
+      logger.info('Proceedings response notification sent to admin', { 
+        proceedingsTitle,
+        respondentName,
+        status,
+        service: 'NotificationService',
+        method: 'notifyAdminOfProceedingsResponse'
+      });
     } catch (error) {
-      console.error(`Failed to send proceedings response notification:`, error);
+      logger.error('Failed to send proceedings response notification', { 
+        error: error.message,
+        proceedingsTitle,
+        respondentName,
+        status,
+        service: 'NotificationService',
+        method: 'notifyAdminOfProceedingsResponse'
+      });
       throw error;
     }
   }
@@ -674,9 +739,22 @@ SOBIE Conference Platform
     
     try {
       await this.emailTransporter.sendMail(mailOptions);
-      console.log(`Proceedings submission notification sent to admin`);
+      logger.info('Proceedings submission notification sent to admin', { 
+        submissionTitle,
+        authorName,
+        authorEmail,
+        service: 'NotificationService',
+        method: 'notifyAdminOfProceedingsSubmission'
+      });
     } catch (error) {
-      console.error(`Failed to send proceedings submission notification:`, error);
+      logger.error('Failed to send proceedings submission notification', { 
+        error: error.message,
+        submissionTitle,
+        authorName,
+        authorEmail,
+        service: 'NotificationService',
+        method: 'notifyAdminOfProceedingsSubmission'
+      });
       throw error;
     }
   }
@@ -756,9 +834,22 @@ SOBIE Conference Platform
     
     try {
       await this.emailTransporter.sendMail(mailOptions);
-      console.log(`Editor assignment notification sent to ${editorEmail}`);
+      logger.info('Editor assignment notification sent successfully', { 
+        editorEmail,
+        submissionTitle,
+        authorName,
+        service: 'NotificationService',
+        method: 'notifyEditorOfAssignment'
+      });
     } catch (error) {
-      console.error(`Failed to send editor assignment notification to ${editorEmail}:`, error);
+      logger.error('Failed to send editor assignment notification', { 
+        editorEmail, 
+        error: error.message,
+        submissionTitle,
+        authorName,
+        service: 'NotificationService',
+        method: 'notifyEditorOfAssignment'
+      });
       throw error;
     }
   }
@@ -845,9 +936,22 @@ SOBIE Conference Platform
     
     try {
       await this.emailTransporter.sendMail(mailOptions);
-      console.log(`Acceptance notification sent to ${authorEmail}`);
+      logger.info('Acceptance notification sent successfully', { 
+        authorEmail,
+        submissionTitle,
+        authorName,
+        service: 'NotificationService',
+        method: 'notifyAuthorOfAcceptance'
+      });
     } catch (error) {
-      console.error(`Failed to send acceptance notification to ${authorEmail}:`, error);
+      logger.error('Failed to send acceptance notification', { 
+        authorEmail, 
+        error: error.message,
+        submissionTitle,
+        authorName,
+        service: 'NotificationService',
+        method: 'notifyAuthorOfAcceptance'
+      });
       throw error;
     }
   }
@@ -930,9 +1034,24 @@ SOBIE Conference Platform
     
     try {
       await this.emailTransporter.sendMail(mailOptions);
-      console.log(`Publication notification sent to ${authorEmail}`);
+      logger.info('Publication notification sent successfully', { 
+        authorEmail,
+        submissionTitle,
+        authorName,
+        publicationUrl,
+        service: 'NotificationService',
+        method: 'notifyAuthorOfPublication'
+      });
     } catch (error) {
-      console.error(`Failed to send publication notification to ${authorEmail}:`, error);
+      logger.error('Failed to send publication notification', { 
+        authorEmail, 
+        error: error.message,
+        submissionTitle,
+        authorName,
+        publicationUrl,
+        service: 'NotificationService',
+        method: 'notifyAuthorOfPublication'
+      });
       throw error;
     }
   }

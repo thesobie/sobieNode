@@ -1,247 +1,344 @@
-# So## Features
+---
+layout: default
+title: Documentation Portal
+nav_order: 2
+description: "Comprehensive guides, API references, and technical specifications"
+---
 
-- 🚀 **Express.js** - Fast, unopinionated web framework
-- 🗄️ **MongoDB Atlas** - Cloud database with Mongoose ODM
-- 🎓 **SOBIE Conference Features** - Academic conference management system
-- 👥 **Enhanced User Profiles** - Academic titles, affiliations, and conference preferences
-- 🛡️ **Security** - Helmet for security headers, CORS support, rate limiting
-- 📝 **Logging** - Morgan HTTP request logger
-- ✅ **Testing** - Jest testing framework with Supertest
-- 🔧 **Development** - Nodemon for auto-restart during development
-- 📋 **Code Quality** - ESLint with Standard configuration
-- 🗂️ **Modular Architecture** - Organized folder structure with separation of concernsNode.js Backend Server
+# 📚 SOBIE Conference API Documentation
+{: .fs-8 }
 
-A boilerplate Node.js backend server built with Express.js, featuring a modular architecture and best practices.
+**Comprehensive guides, API references, and technical specifications for the SOBIE Conference management system backend**
+{: .fs-6 .fw-300 }
 
-## Features
+> 📁 **Project Organization**: For information about the project structure and file organization, see [**Directory Organization**](./DIRECTORY_ORGANIZATION.md)
+{: .highlight }
 
-- 🚀 **Express.js** - Fast, unopinionated web framework
-- �️ **MongoDB Atlas** - Cloud database with Mongoose ODM
-- �🛡️ **Security** - Helmet for security headers, CORS support, rate limiting
-- 📝 **Logging** - Morgan HTTP request logger
-- ✅ **Testing** - Jest testing framework with Supertest
-- 🔧 **Development** - Nodemon for auto-restart during development
-- 📋 **Code Quality** - ESLint with Standard configuration
-- 🗂️ **Modular Architecture** - Organized folder structure with separation of concerns
+---
 
-## Project Structure
+## 🗂️ **Documentation Navigation**
 
-```
-src/
-├── config/            # Database configuration
-├── controllers/       # Request handlers
-├── middleware/        # Custom middleware
-├── models/           # MongoDB/Mongoose models
-├── routes/           # Route definitions
-├── scripts/          # Utility scripts (seeding, etc.)
-├── services/         # Business logic
-├── utils/            # Utility functions
-└── server.js         # Main server file
+### � **System Status & Reports**
+| Document | Description | Type |
+|----------|-------------|------|
+| [**Project Status Final**](./PROJECT_STATUS_FINAL.md) | Complete project implementation status | 📊 Final Report |
+| [**Backend Assessment**](./BACKEND-ASSESSMENT.md) | Complete technical overview and system status | 📊 System Overview |
+| [**Housekeeping Report**](./HOUSEKEEPING-REPORT.md) | Development progress and modernization summary | 📋 Development Report |
+| [**Directory Organization**](./DIRECTORY_ORGANIZATION.md) | Project structure and file organization | 📁 Organization Guide |
 
-__tests__/            # Organized test files
-├── auth/             # Authentication tests
-├── content/          # Content moderation tests
-├── demo/             # Demo and example scripts
-└── README.md         # Test documentation
+---
 
-docs/                 # Project documentation
-├── authentication/   # Authentication documentation
-└── USER_DATA_STRUCTURE.md
-```
+### 🏗️ **System Architecture**
+| Document | Description | Type |
+|----------|-------------|------|
+| [**Dual Role System**](./DUAL_ROLE_SYSTEM.md) | App roles vs SOBIE community roles | 🎯 Role Management |
+| [**Memorial System**](./MEMORIAL_SYSTEM.md) | In memoriam user management | 🕊️ Memorial Features |
+| [**Profile Dashboard Integration**](./PROFILE_DASHBOARD_INTEGRATION.md) | User profile and conference history | 👤 Profile System |
+| [**Duplicate Merge Success Report**](./DUPLICATE_MERGE_SUCCESS_REPORT.md) | User deduplication results | 🔀 Data Quality |
 
-## Quick Start
+---
 
-1. **Install dependencies:**
-   ```bash
-   npm install
-   ```
+### 🔐 **Authentication & Security**
 
-2. **Set up environment variables:**
-   ```bash
-   cp .env.example .env
-   ```
-   Edit `.env` with your configuration:
-   ```env
-   NODE_ENV=development
-   PORT=3000
-   MONGODB_URI=your_mongodb_connection_string
-   DB_NAME=your_database_name
-   ```
+#### Core Authentication
+| Document | Description | Access Level |
+|----------|-------------|--------------|
+| [**Authentication API**](./AUTHENTICATION_API.md) | Authentication endpoints and methods | 🔓 Public |
+| [**Authentication Results**](./AUTHENTICATION_RESULTS.md) | Authentication response formats | 🔓 Public |
 
-3. **Start development server:**
-   ```bash
-   npm run dev
-   ```
+#### Advanced Authentication
+| Document | Description | Access Level |
+|----------|-------------|--------------|
+| [**Authentication API (Detailed)**](./authentication/AUTHENTICATION_API.md) | In-depth authentication guide | 🔐 Developer |
+| [**Authentication Results (Detailed)**](./authentication/AUTHENTICATION_RESULTS.md) | Comprehensive response documentation | 🔐 Developer |
+| [**Authentication Status**](./authentication/AUTHENTICATION_STATUS.md) | System status and health checks | 🔐 Developer |
 
-4. **Run tests:**
-   ```bash
-   npm test
-   ```
+---
 
-## Available Scripts
+### 👥 **Administration & Management**
 
-- `npm start` - Start production server
-- `npm run dev` - Start development server with nodemon
-- `npm test` - Run tests
-- `npm run test:watch` - Run tests in watch mode
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint errors automatically
-- `npm run seed` - Seed database with sample data
+| Document | Description | Access Level |
+|----------|-------------|--------------|
+| [**Admin API**](./ADMIN_API.md) | Administrative endpoints and operations | 🔒 Admin Only |
+| [**Name Card API**](./apis/NAME-CARD-API.md) | Conference name card generation system | 🔒 Admin Only |
+| [**Venue API**](./apis/VENUE-API.md) | San Destin resort booking and accommodation | 🔐 Authenticated |
+| [**Content Moderation**](./CONTENT_MODERATION.md) | Content safety and moderation system | 🔒 Admin/Moderator |
 
-## API Endpoints
+---
 
-### Health Check
-- `GET /health` - Server health status with database connection info
+### 🔬 **Research & Academic Features**
 
-### API Routes
-- `GET /api` - API information and available endpoints
+| Document | Description | Access Level |
+|----------|-------------|--------------|
+| [**Research Database**](./RESEARCH_DATABASE.md) | Research paper management system | 🔐 Authenticated |
+| [**Research Database Documentation**](./RESEARCH_DATABASE_DOCUMENTATION.md) | Detailed database schema and operations | 🔐 Developer |
 
-### Users
-- `GET /api/users` - Get all users
-- `GET /api/users/:id` - Get user by ID
-- `POST /api/users` - Create new user
-- `PUT /api/users/:id` - Update user
-- `DELETE /api/users/:id` - Delete user
+---
 
-### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/register` - User registration
-- `POST /api/auth/logout` - User logout
-- `GET /api/auth/profile` - Get user profile (requires auth)
+### 💬 **Communication & Community**
 
-### SOBIE Conference Profiles
-- `GET /api/profiles/stats` - Get conference attendee statistics
-- `GET /api/profiles/search` - Search profiles by organization, type, etc.
-- `GET /api/profiles/:id` - Get public user profile
-- `GET /api/profiles/:id/nametag` - Get nametag information
-- `PUT /api/profiles/:id` - Update user profile
+| Document | Description | Access Level |
+|----------|-------------|--------------|
+| [**Communication System**](./communication-system.md) | Messaging and notification system | 🔐 Authenticated |
+| [**Bug Reporting System**](./bug-reporting-system.md) | GitHub-integrated bug tracking | 🔓 Public |
 
-## Example Requests
+---
 
-### Create a SOBIE conference user
+### 📄 **Document & File Management**
+
+| Document | Description | Access Level |
+|----------|-------------|--------------|
+| [**Document Management**](./DOCUMENT_MANAGEMENT.md) | File upload and document handling | 🔐 Authenticated |
+
+---
+
+### 🎨 **Frontend Integration Guides**
+
+#### JavaScript Integration Examples
+| File | Description | Framework |
+|------|-------------|-----------|
+| [**Account Recovery Frontend**](./account-recovery-frontend.js) | Account recovery UI integration | 🌐 Vanilla JS |
+| [**Photo Upload Frontend**](./photo-upload-frontend.js) | Photo upload component | 🌐 Vanilla JS |
+
+#### Framework-Specific Guides
+| Directory | Description | Frameworks |
+|-----------|-------------|------------|
+| [**Frontend Guides**](./frontend-guides/) | Framework-specific integration examples | ⚛️ React, 🔷 Vue, 🅰️ Angular |
+
+---
+
+## 🔗 **Quick Links**
+
+### 🚀 **For Developers**
+- **API Base URL**: `http://localhost:3000/api`
+- **Health Check**: `http://localhost:3000/health`
+- **API Discovery**: `http://localhost:3000/api`
+
+### 📋 **Common Endpoints**
 ```bash
-curl -X POST http://localhost:3000/api/users \
-  -H "Content-Type: application/json" \
-  -d '{
-    "email": "professor@university.edu",
-    "password": "password123",
-    "name": {
-      "firstName": "Jane",
-      "lastName": "Smith",
-      "prefix": "Dr.",
-      "suffix": "Ph.D.",
-      "pronouns": "she/her"
-    },
-    "nametag": {
-      "preferredSalutation": "Dr. Smith"
-    },
-    "userType": "academic",
-    "affiliation": {
-      "organization": "University Name",
-      "college": "College of Business",
-      "department": "Information Systems",
-      "jobTitle": "Associate Professor"
+# Authentication
+POST /api/auth/login
+POST /api/auth/register
+POST /api/auth/magic-link
+
+# User Management
+GET  /api/users
+GET  /api/profiles/:id
+PUT  /api/profiles/me
+
+# Research
+GET  /api/research
+POST /api/research-submission
+GET  /api/research-submission/my
+
+# Conference
+GET  /api/conference
+POST /api/conference/register
+GET  /api/conference/registration
+
+# Community
+GET  /api/community
+POST /api/community/interest
+GET  /api/community/my-interests
+```
+
+---
+
+## 📱 **Integration Examples**
+
+### Frontend Frameworks
+
+#### React Integration
+```javascript
+// Example API call with React
+const fetchUserProfile = async () => {
+  const response = await fetch('/api/profiles/me', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     }
-  }'
+  });
+  return response.json();
+};
 ```
 
-### Get conference statistics
-```bash
-curl http://localhost:3000/api/profiles/stats
+#### Vue.js Integration
+```javascript
+// Example API call with Vue.js
+export default {
+  async mounted() {
+    try {
+      const response = await this.$http.get('/api/research');
+      this.papers = response.data;
+    } catch (error) {
+      console.error('Failed to fetch papers:', error);
+    }
+  }
+}
 ```
 
-### Search for students
-```bash
-curl "http://localhost:3000/api/profiles/search?userType=student"
+#### Angular Integration
+```typescript
+// Example service with Angular
+@Injectable()
+export class ApiService {
+  constructor(private http: HttpClient) {}
+  
+  getConferenceInfo() {
+    return this.http.get('/api/conference');
+  }
+}
 ```
 
-### Get nametag information
+---
+
+## 🛠️ **Development Tools**
+
+### Environment Setup
 ```bash
-curl http://localhost:3000/api/profiles/{userId}/nametag
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
+
+# Run tests
+npm test
+
+# Validate environment
+npm run validate:env
+
+# Start production server
+npm start
 ```
 
-### Login
+### Testing Endpoints
 ```bash
+# Health check
+curl http://localhost:3000/health
+
+# API discovery
+curl http://localhost:3000/api
+
+# Authentication test
 curl -X POST http://localhost:3000/api/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email": "john@example.com", "password": "password123"}'
+  -d '{"email":"test@example.com","password":"password"}'
 ```
 
-### Seed database with sample data
+---
+
+## 📊 **System Status**
+
+### Current Status
+- **Server**: ✅ Running on http://localhost:3000
+- **Database**: ✅ MongoDB Atlas Connected
+- **Authentication**: ✅ JWT Configured
+- **Email Service**: ✅ SMTP Configured (Development)
+- **File Storage**: ✅ Multiple Providers Supported
+- **Logging**: ✅ Winston Structured Logging
+
+### Health Monitoring
+```json
+{
+  "status": "OK",
+  "timestamp": "2025-08-12T21:28:02.800Z",
+  "uptime": 9.150,
+  "database": {
+    "status": "connected",
+    "name": "sobienode"
+  },
+  "services": {
+    "email": "configured",
+    "sms": "not_configured"
+  }
+}
+```
+
+---
+
+## 🔒 **Security & Access Levels**
+
+### Access Level Guide
+- 🔓 **Public**: No authentication required
+- 🔐 **Authenticated**: Valid JWT token required
+- 🔒 **Admin Only**: Admin role required
+- 🔐 **Developer**: Technical documentation for developers
+
+### Authentication Headers
 ```bash
-npm run seed
+# Required for authenticated endpoints
+Authorization: Bearer <jwt_token>
+Content-Type: application/json
 ```
 
-## Environment Variables
+---
 
-Create a `.env` file based on `.env.example`:
+## 📞 **Support & Resources**
 
-```env
-NODE_ENV=development
-PORT=3000
-MONGODB_URI=your_mongodb_connection_string
-DB_NAME=your_database_name
+### Development Resources
+- **GitHub Repository**: [thesobie/sobieNode](https://github.com/thesobie/sobieNode)
+- **Issue Tracker**: GitHub Issues
+- **License**: [MIT License](./LICENSE)
+
+### API Standards
+- **REST Principles**: RESTful API design
+- **HTTP Status Codes**: Standard HTTP responses
+- **JSON Format**: Consistent JSON response structure
+- **Error Handling**: Standardized error responses
+
+### Response Format
+```json
+{
+  "success": true,
+  "data": { /* response data */ },
+  "message": "Operation completed successfully",
+  "timestamp": "2025-08-12T21:28:02.800Z"
+}
 ```
 
-## Database
+---
 
-The application uses MongoDB Atlas with Mongoose ODM. The database schema includes:
+## 🗺️ **Documentation Roadmap**
 
-### Enhanced User Model for SOBIE Conference
-- **name**: Complex object with firstName, lastName, middleName, prefix, suffix, preferredName
-- **pronouns**: Inclusive pronoun options (he/him, she/her, they/them, etc.)
-- **nametag**: Conference nametag preferences (preferredSalutation, displayName)
-- **userType**: 'student', 'academic', or 'other'
-- **studentLevel**: 'undergraduate', 'graduate', or 'doctorate' (for students)
-- **role**: System role ('user', 'reviewer', 'committee', 'admin')
-- **affiliation**: Organization, college, department, jobTitle, position
-- **contact**: Phone, website, LinkedIn, ORCID
-- **preferences**: Dietary restrictions, accessibility needs, communication preferences
-- **authentication**: Email/password or magic link options
-- **security**: Account locking, login attempts tracking, email verification
+### Planned Documentation
+- [ ] **Swagger/OpenAPI** - Interactive API documentation
+- [ ] **Postman Collection** - Ready-to-use API collection
+- [ ] **GraphQL Schema** - Future GraphQL implementation
+- [ ] **WebSocket Events** - Real-time feature documentation
+- [ ] **Database Schema** - Complete data model documentation
+- [ ] **Deployment Guide** - Production deployment instructions
 
-### Features:
-- **Soft Delete**: Users are marked as inactive instead of being removed
-- **Email Validation**: Proper email format validation
-- **Indexing**: Optimized queries with email and createdAt indexes
-- **Schema Validation**: Built-in Mongoose validation
+---
 
-## Next Steps
+## 🎯 **Best Practices**
 
-This boilerplate provides a solid foundation. Consider adding:
+### API Usage
+1. **Always authenticate** for protected endpoints
+2. **Handle errors gracefully** with proper status codes
+3. **Use pagination** for large data sets
+4. **Implement caching** for frequently accessed data
+5. **Follow rate limits** to avoid throttling
 
-- **JWT Authentication** with proper token verification and bcrypt password hashing
-- **Input Validation** using libraries like Joi or express-validator
-- **API Documentation** with Swagger/OpenAPI
-- **File Upload** handling
-- **Email Service** integration
-- **Caching** with Redis
-- **Monitoring** and logging improvements
-- **Pagination** for large datasets
-- **Search and Filtering** capabilities
+### Security Guidelines
+1. **Store JWT tokens securely** (httpOnly cookies recommended)
+2. **Validate all inputs** on the frontend
+3. **Use HTTPS** in production
+4. **Implement CSRF protection** for web applications
+5. **Regular security audits** of dependencies
 
-## Testing
+---
 
-The project includes test examples using Jest and Supertest. Tests cover:
+*Last Updated: August 12, 2025*  
+*Documentation Version: 1.0.0*  
+*Backend Version: 1.0.0*
 
-- Server health endpoints
-- API route functionality
-- Error handling
-- User CRUD operations
+---
 
-Run tests with:
-```bash
-npm test
-```
+<div align="center">
 
-## Contributing
+**🚀 Ready to build amazing applications with the SOBIE Conference API! 🚀**
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+*For questions or support, please create an issue in the GitHub repository.*
 
-## License
-
-This project is licensed under the ISC License - see the LICENSE file for details.
+</div>

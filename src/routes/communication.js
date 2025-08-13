@@ -11,12 +11,12 @@ const {
   markNotificationAsRead,
   markMultipleNotificationsAsRead
 } = require('../controllers/communicationController');
-const { authenticateUser, authorizeRoles } = require('../middleware/auth');
-const { validate } = require('../middleware/validation');
+const { authMiddleware, requireRole } = require('../middleware/auth');
+const { validationMiddleware } = require('../middleware/validation');
 const { body, param, query } = require('express-validator');
 
 // All communication routes require authentication
-router.use(authenticateUser);
+router.use(authMiddleware);
 
 // Message validation schemas
 const sendMessageValidation = [
@@ -192,42 +192,42 @@ router.get('/messages',
   query('conferenceId').optional().isMongoId(),
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
-  validate,
+  validationMiddleware,
   getMessages
 );
 
 router.get('/messages/:messageId', 
   messageIdValidation,
-  validate,
+  validationMiddleware,
   getMessage
 );
 
 router.post('/messages', 
   sendMessageValidation,
-  validate,
+  validationMiddleware,
   sendMessage
 );
 
 router.post('/messages/:messageId/reply', 
   messageIdValidation,
   replyMessageValidation,
-  validate,
+  validationMiddleware,
   replyToMessage
 );
 
 // Announcement routes (restricted to admin/conference roles)
 router.post('/announcements',
-  authorizeRoles(['admin', 'conference-chairperson', 'editor']),
+  requireRole('admin', 'conference-chairperson', 'editor'),
   announcementValidation,
-  validate,
+  validationMiddleware,
   sendAnnouncement
 );
 
 // Schedule change routes (restricted to admin/editor)
 router.post('/schedule-changes',
-  authorizeRoles(['admin', 'editor']),
+  requireRole('admin', 'editor'),
   scheduleChangeValidation,
-  validate,
+  validationMiddleware,
   sendScheduleChangeNotification
 );
 
@@ -239,19 +239,19 @@ router.get('/notifications',
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
   query('includeRead').optional().isBoolean(),
-  validate,
+  validationMiddleware,
   getNotifications
 );
 
 router.put('/notifications/:notificationId/read',
   notificationIdValidation,
-  validate,
+  validationMiddleware,
   markNotificationAsRead
 );
 
 router.put('/notifications/mark-read',
   markMultipleReadValidation,
-  validate,
+  validationMiddleware,
   markMultipleNotificationsAsRead
 );
 
@@ -372,6 +372,7 @@ router.get('/stats', async (req, res) => {
 // @desc    Search messages
 // @route   GET /api/communications/messages/search
 // @access  Private
+
 router.get('/messages/search',
   query('q').notEmpty().withMessage('Search query is required'),
   query('type').optional().isIn(['direct', 'announcement', 'schedule_change']),
@@ -380,7 +381,7 @@ router.get('/messages/search',
   query('dateTo').optional().isISO8601(),
   query('page').optional().isInt({ min: 1 }),
   query('limit').optional().isInt({ min: 1, max: 100 }),
-  validate,
+  validationMiddleware,
   async (req, res) => {
     try {
       const userId = req.user._id;
