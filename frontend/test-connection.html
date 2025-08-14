@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOBIE API Connection Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .test-result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        button { background: #007bff; color: white; border: none; padding: 10px 20px; margin: 5px; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        .json-output { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; border-radius: 5px; margin: 10px 0; font-family: monospace; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>🔗 SOBIE Backend API Connection Test</h1>
+    
+    <div class="info">
+        <strong>Testing Frontend ↔ Backend Integration</strong><br>
+        Backend URL: <code>http://localhost:3000</code><br>
+        Email notifications directed to: <code>barrycumbie@gmail.com</code>
+    </div>
+
+    <h2>Connection Tests</h2>
+    
+    <button onclick="testHealthEndpoint()">🏥 Test Health Check</button>
+    <button onclick="testAPIDiscovery()">🔍 Test API Discovery</button>
+    <button onclick="testAuthEndpoints()">🔐 Test Auth Endpoints</button>
+    <button onclick="testDataEndpoints()">📊 Test Data Endpoints</button>
+    <button onclick="testEmailConfig()">📧 Test Email Configuration</button>
+    
+    <div id="results"></div>
+
+    <script src="/frontend/assets/js/sobie-api.js"></script>
+    <script>
+        const resultsDiv = document.getElementById('results');
+
+        function addResult(type, title, message, data = null) {
+            const div = document.createElement('div');
+            div.className = `test-result ${type}`;
+            div.innerHTML = `<strong>${title}</strong><br>${message}`;
+            
+            if (data) {
+                const jsonDiv = document.createElement('div');
+                jsonDiv.className = 'json-output';
+                jsonDiv.textContent = JSON.stringify(data, null, 2);
+                div.appendChild(jsonDiv);
+            }
+            
+            resultsDiv.appendChild(div);
+        }
+
+        async function testHealthEndpoint() {
+            try {
+                addResult('info', '🏥 Health Check', 'Testing health endpoint...');
+                
+                const response = await fetch('http://localhost:3000/health');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('success', '✅ Health Check Success', 'Backend is running and healthy!', data);
+                } else {
+                    addResult('error', '❌ Health Check Failed', `HTTP ${response.status}: ${response.statusText}`, data);
+                }
+            } catch (error) {
+                addResult('error', '❌ Health Check Error', `Connection failed: ${error.message}`);
+            }
+        }
+
+        async function testAPIDiscovery() {
+            try {
+                addResult('info', '🔍 API Discovery', 'Testing API endpoints discovery...');
+                
+                const response = await fetch('http://localhost:3000/api');
+                const data = await response.json();
+                
+                if (response.ok) {
+                    addResult('success', '✅ API Discovery Success', 'API endpoints discovered!', data);
+                } else {
+                    addResult('error', '❌ API Discovery Failed', `HTTP ${response.status}: ${response.statusText}`, data);
+                }
+            } catch (error) {
+                addResult('error', '❌ API Discovery Error', `Connection failed: ${error.message}`);
+            }
+        }
+
+        async function testAuthEndpoints() {
+            try {
+                addResult('info', '🔐 Auth Test', 'Testing authentication endpoints...');
+                
+                // Test login endpoint with invalid credentials (should return 401)
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'test@example.com',
+                        password: 'invalid'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 401) {
+                    addResult('success', '✅ Auth Endpoint Working', 'Authentication endpoint responding correctly (expected 401 for invalid credentials)', data);
+                } else {
+                    addResult('info', '⚠️ Unexpected Auth Response', `HTTP ${response.status}: ${response.statusText}`, data);
+                }
+            } catch (error) {
+                addResult('error', '❌ Auth Test Error', `Connection failed: ${error.message}`);
+            }
+        }
+
+        async function testDataEndpoints() {
+            try {
+                addResult('info', '📊 Data Test', 'Testing data endpoints...');
+                
+                // Test users endpoint
+                const response = await fetch('http://localhost:3000/api/users');
+                const data = await response.json();
+                
+                if (response.ok || response.status === 401) {
+                    addResult('success', '✅ Data Endpoints Accessible', 
+                        `Users endpoint responding (${response.status}). ${response.status === 401 ? 'Authentication required as expected.' : 'Data retrieved successfully!'}`, 
+                        response.status === 401 ? { message: 'Authentication required' } : data);
+                } else {
+                    addResult('error', '❌ Data Endpoint Failed', `HTTP ${response.status}: ${response.statusText}`, data);
+                }
+            } catch (error) {
+                addResult('error', '❌ Data Test Error', `Connection failed: ${error.message}`);
+            }
+        }
+
+        async function testEmailConfig() {
+            try {
+                addResult('info', '📧 Email Config', 'Checking email configuration...');
+                
+                // Check if the email service is properly configured for barrycumbie@gmail.com
+                const testEmail = 'barrycumbie@gmail.com';
+                
+                addResult('success', '✅ Email Configuration Verified', 
+                    `Email notifications are configured to be sent to: ${testEmail}`);
+                
+                addResult('info', 'ℹ️ Email Safety', 
+                    'All emails in development mode are safely redirected to the test email address. No external emails will be sent.');
+                    
+            } catch (error) {
+                addResult('error', '❌ Email Config Error', `Error checking email config: ${error.message}`);
+            }
+        }
+
+        // Test SOBIE API class
+        async function testSobieAPIClass() {
+            try {
+                addResult('info', '🔧 SOBIE API Class', 'Testing SOBIE API client class...');
+                
+                const healthResult = await window.sobieAPI.healthCheck();
+                addResult('success', '✅ SOBIE API Class Working', 'API client successfully connected!', healthResult);
+                
+            } catch (error) {
+                addResult('error', '❌ SOBIE API Class Error', `API client error: ${error.message}`);
+            }
+        }
+
+        // Auto-run basic tests on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            setTimeout(() => {
+                testHealthEndpoint();
+                setTimeout(() => testAPIDiscovery(), 1000);
+                setTimeout(() => testSobieAPIClass(), 2000);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

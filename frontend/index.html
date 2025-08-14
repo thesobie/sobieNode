@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOBIE Conference Platform</title>
+    
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="/assets/images/icons/favicon.svg">
+    <link rel="icon" type="image/png" href="/assets/images/icons/favicon.svg">
+    <link rel="apple-touch-icon" href="/assets/images/icons/favicon.svg">    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Normalize.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" rel="stylesheet">
+    
+    <!-- jQuery UI CSS -->
+    <link href="https://code.jquery.com/ui/1.13.0/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+    
+    <!-- Custom SOBIE Styles -->
+    <link href="./assets/css/sobie-styles.css" rel="stylesheet">
+    
+    <!-- Meta tags for SEO and social sharing -->
+    <meta name="description" content="SOBIE Conference Platform - Academic research paper and program management system">
+    <meta name="keywords" content="academic conference, research papers, SOBIE, conference management">
+    <meta name="author" content="SOBIE Conference Platform">
+    
+    <!-- Open Graph meta tags -->
+    <meta property="og:title" content="SOBIE Conference Platform">
+    <meta property="og:description" content="Academic research paper and program management system">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="./assets/favicon.ico">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="./assets/js/sobie-api.js" as="script">
+    <link rel="preload" href="./assets/js/sobie-components.js" as="script">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex align-items-center justify-content-center" style="z-index: 9999;">
+        <div class="text-center">
+            <div class="loading-spinner mb-3" style="width: 3rem; height: 3rem;"></div>
+            <h5 class="text-muted">Loading SOBIE Platform...</h5>
+        </div>
+    </div>
+
+    <!-- Desktop Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm d-mobile-none desktop-nav">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="./index.html">
+                <img src="/assets/images/logos/sobie-logo-text.svg" alt="SOBIE Conference" height="40" class="me-2">
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/public/research.html">
+                            <i class="bi bi-file-text me-1"></i>Research Papers
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/public/programs.html">
+                            <i class="bi bi-calendar-event me-1"></i>Programs
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/public/about.html">
+                            <i class="bi bi-info-circle me-1"></i>About
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- User Menu -->
+                <ul class="navbar-nav">
+                    <li class="nav-item" id="auth-menu">
+                        <!-- Populated by JavaScript -->
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="container-fluid px-3 px-md-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                    <div>
+                        <h1 class="h3 mb-1" id="page-title">SOBIE Conference Platform</h1>
+                        <p class="text-muted mb-0" id="page-subtitle">Academic Research & Program Management</p>
+                    </div>
+                    <div class="mt-3 mt-md-0">
+                        <!-- Global Search -->
+                        <div class="input-group" style="max-width: 300px;">
+                            <input type="text" class="form-control" placeholder="Search..." 
+                                   data-search="general" data-results="#search-results">
+                            <button class="btn btn-outline-secondary" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                        <!-- Search Results Dropdown -->
+                        <div id="search-results" class="position-absolute bg-white border rounded shadow-sm mt-1 d-none" 
+                             style="min-width: 300px; max-height: 400px; overflow-y: auto; z-index: 1000;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Alert Container -->
+        <div id="alert-container" class="mb-3"></div>
+
+        <!-- Main Content Container -->
+        <div id="main-content">
+            <!-- Conference Marquee Section -->
+            <div class="row mb-5" id="conference-marquee">
+                <div class="col-12">
+                    <div class="card border-0 bg-gradient" style="background: linear-gradient(135deg, var(--sobie-primary) 0%, var(--sobie-secondary) 100%);">
+                        <div class="card-body text-white py-5">
+                            <div class="row align-items-center">
+                                <div class="col-lg-8">
+                                    <div id="marquee-content">
+                                        <!-- Dynamic content will be loaded here -->
+                                        <div class="placeholder-content">
+                                            <h2 class="display-5 fw-bold mb-3">SOBIE 2025</h2>
+                                            <p class="lead mb-4">Responding to Current Economic and Market Issues</p>
+                                            <p class="mb-4">Join us April 9-11, 2025 at Sandestin Golf and Beach Resort, Miramar Beach, Florida</p>
+                                            <div class="d-flex flex-wrap gap-3">
+                                                <button class="btn btn-light btn-lg" id="marquee-primary-action">
+                                                    <i class="bi bi-calendar-plus me-2"></i>
+                                                    <span id="action-text">Coming Soon</span>
+                                                </button>
+                                                <button class="btn btn-outline-light btn-lg" id="marquee-secondary-action">
+                                                    <i class="bi bi-info-circle me-2"></i>
+                                                    Learn More
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4 text-center">
+                                    <div id="conference-visual">
+                                        <!-- Conference image or countdown will go here -->
+                                        <img src="/assets/images/logos/sobie-logo-clean.svg" alt="SOBIE Conference" 
+                                             width="120" height="120" class="mb-3 opacity-75">
+                                        <div id="countdown-container" class="d-none">
+                                            <div class="row g-2 text-center">
+                                                <div class="col-3">
+                                                    <div class="bg-white bg-opacity-25 rounded p-3">
+                                                        <div class="h3 mb-0" id="days">--</div>
+                                                        <small>Days</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-3">
+                                                    <div class="bg-white bg-opacity-25 rounded p-3">
+                                                        <div class="h3 mb-0" id="hours">--</div>
+                                                        <small>Hrs</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-3">
+                                                    <div class="bg-white bg-opacity-25 rounded p-3">
+                                                        <div class="h3 mb-0" id="minutes">--</div>
+                                                        <small>Min</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-3">
+                                                    <div class="bg-white bg-opacity-25 rounded p-3">
+                                                        <div class="h3 mb-0" id="seconds">--</div>
+                                                        <small>Sec</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <!-- Instagram Feed Integration -->
+                                        <div id="instagram-feed" class="mt-4 d-none">
+                                            <h6 class="text-white-50 mb-3">#sobie25</h6>
+                                            <div id="instagram-posts" class="row g-2">
+                                                <!-- Instagram posts will be populated here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Content will be loaded here by individual pages -->
+            
+            <!-- Default Welcome Content -->
+            <div class="row" id="welcome-content">
+                <div class="col-12 col-lg-8">
+                    <div class="card">
+                        <div class="card-body text-center">
+                            <img src="/assets/images/logos/sobie-logo-clean.svg" alt="SOBIE Conference" width="80" height="80" class="mb-3">
+                            <h5 class="card-title">
+                                Welcome to SOBIE Conference Platform
+                            </h5>
+                            <p class="card-text">
+                                The SOBIE (Society of Biomedical Engineering) Conference Platform is a comprehensive
+                                system for managing academic research papers, conference programs, and participant information.
+                            </p>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <div class="d-grid">
+                                        <a href="./public/research.html" class="btn btn-primary">
+                                            <i class="bi bi-file-text me-2"></i>
+                                            Browse Research Papers
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="d-grid">
+                                        <a href="./public/programs.html" class="btn btn-outline-primary">
+                                            <i class="bi bi-calendar-event me-2"></i>
+                                            View Programs
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-12 col-lg-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">Quick Stats</h6>
+                            <div class="row g-2 text-center">
+                                <div class="col-6">
+                                    <div class="bg-light rounded p-2">
+                                        <div class="h4 mb-0 text-primary" id="stats-papers">--</div>
+                                        <small class="text-muted">Papers</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light rounded p-2">
+                                        <div class="h4 mb-0 text-success" id="stats-programs">--</div>
+                                        <small class="text-muted">Programs</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light rounded p-2">
+                                        <div class="h4 mb-0 text-info" id="stats-authors">--</div>
+                                        <small class="text-muted">Authors</small>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    <div class="bg-light rounded p-2">
+                                        <div class="h4 mb-0 text-warning" id="stats-institutions">--</div>
+                                        <small class="text-muted">Institutions</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Actions -->
+                    <div class="card mt-3 admin-only" style="display: none;">
+                        <div class="card-body">
+                            <h6 class="card-title">Quick Actions</h6>
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-sm btn-outline-primary" id="btn-add-paper">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Paper
+                                </button>
+                                <button class="btn btn-sm btn-outline-success" id="btn-add-program">
+                                    <i class="bi bi-plus-circle me-1"></i>Add Program
+                                </button>
+                                <button class="btn btn-sm btn-outline-info" id="btn-import-data">
+                                    <i class="bi bi-upload me-1"></i>Import Data
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav d-desktop-none">
+        <div class="nav-item">
+            <a href="./index.html" class="nav-link">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="./public/research.html" class="nav-link">
+                <i class="bi bi-file-text"></i>
+                <span>Research</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="./public/programs.html" class="nav-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Programs</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="./user/dashboard.html" class="nav-link">
+                <i class="bi bi-person"></i>
+                <span>Profile</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="#" class="nav-link" id="mobile-menu-btn">
+                <i class="bi bi-three-dots"></i>
+                <span>More</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu Modal -->
+    <div class="modal fade" id="mobileMenuModal" tabindex="-1">
+        <div class="modal-dialog modal-fullscreen-sm-down">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Menu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="list-group list-group-flush">
+                        <a href="./public/about.html" class="list-group-item list-group-item-action">
+                            <i class="bi bi-info-circle me-2"></i>About
+                        </a>
+                        <a href="/admin/dashboard.html" class="list-group-item list-group-item-action admin-only">
+                            <i class="bi bi-gear me-2"></i>Admin Panel
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" id="mobile-settings">
+                            <i class="bi bi-sliders me-2"></i>Settings
+                        </a>
+                        <a href="#" class="list-group-item list-group-item-action" id="mobile-help">
+                            <i class="bi bi-question-circle me-2"></i>Help
+                        </a>
+                        <hr>
+                        <a href="#" class="list-group-item list-group-item-action text-danger" id="mobile-logout">
+                            <i class="bi bi-box-arrow-right me-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1050;"></div>
+
+    <!-- JavaScript Libraries -->
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- jQuery UI -->
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SOBIE Platform Scripts -->
+    <script src="./assets/js/sobie-api.js"></script>
+    <script src="./assets/js/sobie-components.js"></script>
+    <script src="./assets/js/instagram-feed.js"></script>
+    
+    <!-- Main Application Script -->
+    <script>
+        // EMERGENCY LOADING SCREEN TIMEOUT - RUNS IMMEDIATELY
+        console.log('🚨 EMERGENCY LOADING SCREEN TIMEOUT STARTING');
+        setTimeout(function() {
+            console.log('🚨 EMERGENCY TIMEOUT TRIGGERED');
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                // Use multiple methods to ensure it's hidden
+                loadingScreen.style.display = 'none';
+                loadingScreen.style.visibility = 'hidden';
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.zIndex = '-1';
+                loadingScreen.classList.add('d-none');
+                console.log('🚨 EMERGENCY: Loading screen hidden by force');
+            } else {
+                console.log('🚨 EMERGENCY: Loading screen element not found');
+            }
+        }, 200); // Even faster emergency timeout
+        
+        // Main application initialization
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 SOBIE Platform starting initialization...');
+            
+            // Immediate backup hide
+            const loadingScreen = document.getElementById('loading-screen');
+            if (loadingScreen) {
+                loadingScreen.style.display = 'none';
+                loadingScreen.style.visibility = 'hidden';
+                loadingScreen.style.opacity = '0';
+                loadingScreen.classList.add('d-none');
+                console.log('✅ Loading screen hidden immediately on DOM ready');
+            }
+            
+            // Backup timeout within DOMContentLoaded
+            setTimeout(() => {
+                console.log('⏰ Backup timeout triggered - attempting to hide loading screen');
+                const loadingScreen = document.getElementById('loading-screen');
+                console.log('🔍 Loading screen element found:', !!loadingScreen);
+                
+                if (loadingScreen) {
+                    console.log('🔄 Setting display to none...');
+                    loadingScreen.style.display = 'none';
+                    loadingScreen.style.visibility = 'hidden';
+                    loadingScreen.style.opacity = '0';
+                    loadingScreen.classList.add('d-none');
+                    console.log('✅ Loading screen hidden successfully by backup');
+                } else {
+                    console.error('❌ Loading screen element not found in backup!');
+                }
+            }, 50); // Very short backup timeout
+
+            try {
+                console.log('🔄 Starting async initialization...');
+                
+                // Initialize authentication state
+                console.log('🔄 Initializing authentication...');
+                if (typeof initializeAuth === 'function') {
+                    await initializeAuth();
+                    console.log('✅ Authentication initialized');
+                } else {
+                    console.warn('⚠️ initializeAuth function not found');
+                }
+                
+                // Load dashboard stats
+                console.log('🔄 Loading dashboard stats...');
+                if (typeof loadDashboardStats === 'function') {
+                    await loadDashboardStats();
+                    console.log('✅ Dashboard stats loaded');
+                } else {
+                    console.warn('⚠️ loadDashboardStats function not found');
+                }
+                
+                // Load conference marquee
+                console.log('🔄 Loading conference marquee...');
+                if (typeof loadConferenceMarquee === 'function') {
+                    await loadConferenceMarquee();
+                    console.log('✅ Conference marquee loaded');
+                } else {
+                    console.warn('⚠️ loadConferenceMarquee function not found');
+                }
+                
+                // Setup mobile menu
+                console.log('🔄 Setting up mobile menu...');
+                if (typeof setupMobileMenu === 'function') {
+                    setupMobileMenu();
+                    console.log('✅ Mobile menu setup complete');
+                } else {
+                    console.warn('⚠️ setupMobileMenu function not found');
+                }
+                
+                // Setup search functionality
+                console.log('🔄 Setting up search functionality...');
+                if (typeof setupGlobalSearch === 'function') {
+                    setupGlobalSearch();
+                    console.log('✅ Search functionality setup complete');
+                } else {
+                    console.warn('⚠️ setupGlobalSearch function not found');
+                }
+                
+                // Setup quick actions
+                console.log('🔄 Setting up quick actions...');
+                if (typeof setupQuickActions === 'function') {
+                    setupQuickActions();
+                    console.log('✅ Quick actions setup complete');
+                } else {
+                    console.warn('⚠️ setupQuickActions function not found');
+                }
+                
+                console.log('🎉 SOBIE Platform initialized successfully');
+                
+            } catch (error) {
+                console.error('❌ Error during initialization:', error);
+                console.error('❌ Stack trace:', error.stack);
+                // Still allow the app to continue even if some features fail
+            }
+        });
+
+        // Authentication initialization
+        async function initializeAuth() {
+            try {
+                const authMenu = document.getElementById('auth-menu');
+                
+                // Check if SOBIE API is available
+                if (!window.sobieAPI) {
+                    console.warn('⚠️ SOBIE API not available, skipping authentication');
+                    authMenu.innerHTML = `
+                        <a class="nav-link" href="./public/login.html">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                    `;
+                    return;
+                }
+                
+                if (window.sobieAPI.isAuthenticated()) {
+                    const userRole = window.sobieAPI.getUserRole();
+                    
+                    authMenu.innerHTML = `
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i>
+                                ${userRole === 'admin' ? 'Admin' : 'User'}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="./user/dashboard.html">
+                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                </a></li>
+                                ${userRole === 'admin' ? 
+                                    '<li><a class="dropdown-item" href="./admin/dashboard.html"><i class="bi bi-gear me-2"></i>Admin Panel</a></li>' : 
+                                    ''
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    `;
+                    
+                    // Show/hide admin elements
+                    const adminElements = document.querySelectorAll('.admin-only');
+                    adminElements.forEach(el => {
+                        el.style.display = userRole === 'admin' ? '' : 'none';
+                    });
+                    
+                } else {
+                    authMenu.innerHTML = `
+                        <a class="nav-link" href="./public/login.html">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                    `;
+                    
+                    // Hide admin elements
+                    document.querySelectorAll('.admin-only').forEach(el => {
+                        el.style.display = 'none';
+                    });
+                }
+            } catch (error) {
+                console.error('❌ Error initializing authentication:', error);
+            }
+        }
+
+        // Load and display conference marquee
+        async function loadConferenceMarquee() {
+            try {
+                if (!window.sobieAPI) {
+                    console.warn('⚠️ SOBIE API not available, using default marquee');
+                    return;
+                }
+                
+                const conferenceData = await window.sobieAPI.getCurrentConference();
+                console.log('📅 Conference data:', conferenceData);
+                
+                if (conferenceData && conferenceData.conference) {
+                    const conference = conferenceData.conference;
+                    updateMarqueeContent(conference);
+                    
+                    // Start countdown if appropriate
+                    if (shouldShowCountdown(conference)) {
+                        startCountdown(conference);
+                    }
+                    
+                    // Load Instagram feed
+                    loadInstagramFeed(conference.year);
+                }
+            } catch (error) {
+                console.error('❌ Failed to load conference marquee:', error);
+            }
+        }
+
+        // Update marquee content based on conference status and dates
+        function updateMarqueeContent(conference) {
+            const now = new Date();
+            const startDate = new Date(conference.startDate);
+            const endDate = new Date(conference.endDate);
+            const registrationDeadline = new Date(conference.registrationDeadline);
+            const submissionDeadline = conference.submissionDeadline ? new Date(conference.submissionDeadline) : null;
+            
+            const marqueeContent = document.getElementById('marquee-content');
+            const primaryAction = document.getElementById('marquee-primary-action');
+            const secondaryAction = document.getElementById('marquee-secondary-action');
+            const countdownContainer = document.getElementById('countdown-container');
+            
+            let content = '';
+            let primaryButtonText = '';
+            let primaryButtonIcon = 'bi-calendar-plus';
+            let primaryButtonAction = '';
+            let showCountdown = false;
+            
+            // Determine conference phase and content
+            if (now < registrationDeadline && conference.status === 'planning') {
+                // Phase 1: Pre-registration (planning phase)
+                const daysUntilReg = Math.ceil((registrationDeadline - now) / (1000 * 60 * 60 * 24));
+                content = `
+                    <h2 class="display-5 fw-bold mb-3">${conference.name}</h2>
+                    <p class="lead mb-3">${conference.theme}</p>
+                    <p class="mb-4">
+                        <i class="bi bi-geo-alt me-2"></i>
+                        ${conference.location.venue}, ${conference.location.city}, ${conference.location.state}
+                    </p>
+                    <p class="mb-4">
+                        <i class="bi bi-calendar-event me-2"></i>
+                        ${formatDate(startDate)} - ${formatDate(endDate)}
+                    </p>
+                    <div class="alert alert-light d-inline-block mb-4">
+                        <i class="bi bi-clock me-2"></i>
+                        Registration opens in ${daysUntilReg} days (${formatDate(registrationDeadline)})
+                    </div>
+                `;
+                primaryButtonText = 'Registration Opens Soon';
+                primaryButtonIcon = 'bi-clock';
+                primaryButtonAction = 'disabled';
+                
+            } else if (now >= registrationDeadline && now < startDate && conference.status !== 'closed') {
+                // Phase 2: Registration open
+                const daysUntilConf = Math.ceil((startDate - now) / (1000 * 60 * 60 * 24));
+                content = `
+                    <h2 class="display-5 fw-bold mb-3">${conference.name}</h2>
+                    <p class="lead mb-3">${conference.theme}</p>
+                    <p class="mb-4">
+                        <i class="bi bi-geo-alt me-2"></i>
+                        ${conference.location.venue}, ${conference.location.city}, ${conference.location.state}
+                    </p>
+                    <div class="row g-3 mb-4">
+                        <div class="col-auto">
+                            <div class="alert alert-success d-inline-block mb-0">
+                                <i class="bi bi-check-circle me-2"></i>
+                                Registration Open
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <div class="alert alert-light d-inline-block mb-0">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                ${daysUntilConf} days until conference
+                            </div>
+                        </div>
+                    </div>
+                `;
+                primaryButtonText = 'Register Now';
+                primaryButtonIcon = 'bi-person-plus';
+                primaryButtonAction = 'register';
+                showCountdown = true;
+                
+            } else if (now >= startDate && now <= endDate) {
+                // Phase 3: Conference is happening
+                content = `
+                    <h2 class="display-5 fw-bold mb-3">${conference.name}</h2>
+                    <p class="lead mb-3">${conference.theme}</p>
+                    <div class="alert alert-warning d-inline-block mb-4">
+                        <i class="bi bi-broadcast me-2"></i>
+                        <strong>SOBIE ${conference.year} is currently underway!</strong>
+                    </div>
+                    <p class="mb-4">
+                        <i class="bi bi-geo-alt me-2"></i>
+                        ${conference.location.venue}, ${conference.location.city}, ${conference.location.state}
+                    </p>
+                `;
+                primaryButtonText = 'View Live Schedule';
+                primaryButtonIcon = 'bi-calendar-event';
+                primaryButtonAction = 'schedule';
+                
+            } else if (now > endDate) {
+                // Phase 4: Post-conference
+                const nextYear = conference.year + 1;
+                content = `
+                    <h2 class="display-5 fw-bold mb-3">SOBIE ${conference.year} Wrap-Up</h2>
+                    <p class="lead mb-3">Thank you for making SOBIE ${conference.year} a success!</p>
+                    <div class="alert alert-info d-inline-block mb-4">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Conference concluded on ${formatDate(endDate)}
+                    </div>
+                    <p class="mb-4">
+                        <i class="bi bi-calendar-plus me-2"></i>
+                        Save the date: SOBIE ${nextYear} coming soon!
+                    </p>
+                `;
+                primaryButtonText = 'View Proceedings';
+                primaryButtonIcon = 'bi-file-text';
+                primaryButtonAction = 'proceedings';
+            }
+            
+            marqueeContent.innerHTML = content;
+            
+            // Update buttons
+            primaryAction.innerHTML = `<i class="${primaryButtonIcon} me-2"></i>${primaryButtonText}`;
+            if (primaryButtonAction === 'disabled') {
+                primaryAction.classList.add('disabled');
+                primaryAction.setAttribute('disabled', 'true');
+            } else {
+                primaryAction.classList.remove('disabled');
+                primaryAction.removeAttribute('disabled');
+                primaryAction.onclick = () => handleMarqueeAction(primaryButtonAction, conference);
+            }
+            
+            secondaryAction.onclick = () => handleMarqueeAction('about', conference);
+            
+            // Show/hide countdown
+            if (showCountdown) {
+                countdownContainer.classList.remove('d-none');
+            } else {
+                countdownContainer.classList.add('d-none');
+            }
+        }
+
+        // Handle marquee button actions
+        function handleMarqueeAction(action, conference) {
+            switch (action) {
+                case 'register':
+                    window.location.href = '/public/register.html';
+                    break;
+                case 'schedule':
+                    window.location.href = '/public/programs.html';
+                    break;
+                case 'proceedings':
+                    window.location.href = '/public/research.html';
+                    break;
+                case 'about':
+                default:
+                    window.location.href = '/public/about.html';
+                    break;
+            }
+        }
+
+        // Determine if countdown should be shown
+        function shouldShowCountdown(conference) {
+            const now = new Date();
+            const startDate = new Date(conference.startDate);
+            const registrationDeadline = new Date(conference.registrationDeadline);
+            
+            // Show countdown during registration period until conference starts
+            return now >= registrationDeadline && now < startDate;
+        }
+
+        // Start countdown timer
+        function startCountdown(conference) {
+            const startDate = new Date(conference.startDate);
+            
+            function updateCountdown() {
+                const now = new Date();
+                const timeLeft = startDate - now;
+                
+                if (timeLeft <= 0) {
+                    // Conference has started, reload marquee content
+                    updateMarqueeContent(conference);
+                    return;
+                }
+                
+                const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+                
+                document.getElementById('days').textContent = days;
+                document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+                document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+                document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
+            }
+            
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // Load Instagram feed (placeholder for now)
+        async function loadInstagramFeed(year) {
+            try {
+                const instagramFeed = document.getElementById('instagram-feed');
+                const instagramPosts = document.getElementById('instagram-posts');
+                
+                if (!instagramFeed || !instagramPosts) {
+                    console.warn('Instagram feed elements not found');
+                    return;
+                }
+                
+                const hashtag = `sobie${year.toString().slice(-2)}`;
+                
+                // Initialize Instagram feed
+                if (window.InstagramFeed) {
+                    const feed = new window.InstagramFeed();
+                    await feed.renderFeed('instagram-posts', hashtag, 3);
+                    instagramFeed.classList.remove('d-none');
+                } else {
+                    console.warn('Instagram feed class not available');
+                    // Fallback to static content
+                    instagramPosts.innerHTML = `
+                        <div class="col-4">
+                            <div class="bg-white bg-opacity-25 rounded p-2 text-center">
+                                <i class="bi bi-instagram fs-4 mb-2"></i>
+                                <div class="small">Follow</div>
+                                <div class="small">#${hashtag}</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-white bg-opacity-25 rounded p-2 text-center">
+                                <i class="bi bi-camera fs-4 mb-2"></i>
+                                <div class="small">Share your</div>
+                                <div class="small">moments</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="bg-white bg-opacity-25 rounded p-2 text-center">
+                                <i class="bi bi-people fs-4 mb-2"></i>
+                                <div class="small">Connect</div>
+                                <div class="small">with peers</div>
+                            </div>
+                        </div>
+                    `;
+                    instagramFeed.classList.remove('d-none');
+                }
+                
+            } catch (error) {
+                console.error('❌ Failed to load Instagram feed:', error);
+            }
+        }
+
+        // Utility function to format dates
+        function formatDate(date) {
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardStats() {
+            try {
+                // Check if SOBIE API is available
+                if (!window.sobieAPI) {
+                    console.warn('⚠️ SOBIE API not available, using default stats');
+                    // Set default values
+                    ['papers', 'programs', 'authors', 'institutions'].forEach(stat => {
+                        const element = document.getElementById(`stats-${stat}`);
+                        if (element) element.textContent = '--';
+                    });
+                    return;
+                }
+                
+                const stats = await window.sobieAPI.getStats();
+                
+                document.getElementById('stats-papers').textContent = stats.papers || 0;
+                document.getElementById('stats-programs').textContent = stats.programs || 0;
+                document.getElementById('stats-authors').textContent = stats.authors || 0;
+                document.getElementById('stats-institutions').textContent = stats.institutions || 0;
+                
+            } catch (error) {
+                console.error('❌ Failed to load stats:', error);
+                // Set default values
+                ['papers', 'programs', 'authors', 'institutions'].forEach(stat => {
+                    const element = document.getElementById(`stats-${stat}`);
+                    if (element) element.textContent = '--';
+                });
+            }
+        }
+
+        // Setup mobile menu
+        function setupMobileMenu() {
+            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenuModal = new bootstrap.Modal(document.getElementById('mobileMenuModal'));
+            
+            mobileMenuBtn?.addEventListener('click', (e) => {
+                e.preventDefault();
+                mobileMenuModal.show();
+            });
+
+            // Mobile menu actions
+            document.getElementById('mobile-logout')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                logout();
+                mobileMenuModal.hide();
+            });
+        }
+
+        // Setup global search
+        function setupGlobalSearch() {
+            const searchInput = document.querySelector('[data-search="general"]');
+            const searchResults = document.getElementById('search-results');
+            
+            if (searchInput) {
+                searchInput.addEventListener('focus', () => {
+                    if (searchInput.value.trim().length >= 2) {
+                        searchResults.classList.remove('d-none');
+                    }
+                });
+
+                searchInput.addEventListener('blur', () => {
+                    // Delay hiding to allow clicking on results
+                    setTimeout(() => {
+                        searchResults.classList.add('d-none');
+                    }, 200);
+                });
+            }
+        }
+
+        // Setup quick actions
+        function setupQuickActions() {
+            document.getElementById('btn-add-paper')?.addEventListener('click', () => {
+                if (window.sobieAPI.isAuthenticated()) {
+                    window.location.href = '/user/submissions.html';
+                } else {
+                    window.location.href = '/public/login.html';
+                }
+            });
+
+            document.getElementById('btn-add-program')?.addEventListener('click', () => {
+                if (window.sobieAPI.isAuthenticated()) {
+                    window.location.href = '/user/conferences.html';
+                } else {
+                    window.location.href = '/public/login.html';
+                }
+            });
+
+            document.getElementById('btn-import-data')?.addEventListener('click', () => {
+                if (window.sobieAPI.getUserRole() === 'admin') {
+                    window.location.href = '/admin/import.html';
+                } else {
+                    window.sobieComponents.showToast('Admin access required', 'warning');
+                }
+            });
+        }
+
+        // Logout function
+        async function logout() {
+            try {
+                await window.sobieAPI.logout();
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                // Force logout even if API call fails
+                window.sobieAPI.clearAuth();
+                window.location.href = '/';
+            }
+        }
+
+        // Utility functions for page-specific scripts
+        window.sobieUtils = {
+            setPageTitle: (title, subtitle = '') => {
+                document.getElementById('page-title').textContent = title;
+                document.getElementById('page-subtitle').textContent = subtitle;
+                document.title = `${title} - SOBIE Conference Platform`;
+            },
+            
+            showAlert: (message, type = 'info') => {
+                const container = document.getElementById('alert-container');
+                const alert = document.createElement('div');
+                alert.className = `alert alert-${type} alert-dismissible fade show`;
+                alert.innerHTML = `
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+                container.appendChild(alert);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    if (alert.parentElement) {
+                        alert.remove();
+                    }
+                }, 5000);
+            },
+            
+            requireAuth: () => {
+                if (!window.sobieAPI.isAuthenticated()) {
+                    window.location.href = '/public/login.html';
+                    return false;
+                }
+                return true;
+            },
+            
+            requireAdmin: () => {
+                if (!window.sobieAPI.isAuthenticated() || window.sobieAPI.getUserRole() !== 'admin') {
+                    window.location.href = '/';
+                    return false;
+                }
+                return true;
+            }
+        };
+    </script>
+</body>
+</html>

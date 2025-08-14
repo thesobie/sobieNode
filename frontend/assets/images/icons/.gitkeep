@@ -1,0 +1,13 @@
+# Icons Directory
+
+Place custom icons, favicons, and UI elements here.
+
+## Suggested Files:
+- favicon.ico (main favicon)
+- apple-touch-icon.png (iOS home screen icon)
+- conference-icon.svg (conference/presentation icon)
+- registration-icon.svg (registration form icon)
+- location-icon.svg (venue/location icon)
+- calendar-icon.svg (schedule/date icon)
+- download-icon.svg (document download icon)
+- email-icon.svg (contact/email icon)

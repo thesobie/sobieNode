@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Test - SOBIE</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .pass { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .fail { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <h1>JavaScript Loading Test</h1>
+    <div id="test-results"></div>
+
+    <!-- Load external libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Load SOBIE scripts -->
+    <script src="./assets/js/sobie-api.js"></script>
+    <script src="./assets/js/sobie-components.js"></script>
+    
+    <script>
+        const results = document.getElementById('test-results');
+        
+        function addTest(name, passed, details = '') {
+            const div = document.createElement('div');
+            div.className = `test-result ${passed ? 'pass' : 'fail'}`;
+            div.innerHTML = `
+                <strong>${passed ? '✅' : '❌'} ${name}</strong>
+                ${details ? `<br><small>${details}</small>` : ''}
+            `;
+            results.appendChild(div);
+        }
+        
+        function addInfo(message) {
+            const div = document.createElement('div');
+            div.className = 'test-result info';
+            div.innerHTML = `<strong>ℹ️ ${message}</strong>`;
+            results.appendChild(div);
+        }
+        
+        // Wait for DOM to be ready
+        document.addEventListener('DOMContentLoaded', function() {
+            addInfo('Starting JavaScript tests...');
+            
+            // Test jQuery
+            try {
+                addTest('jQuery loaded', typeof $ !== 'undefined', `Version: ${$.fn.jquery || 'unknown'}`);
+            } catch (e) {
+                addTest('jQuery loaded', false, e.message);
+            }
+            
+            // Test jQuery UI
+            try {
+                addTest('jQuery UI loaded', typeof $.ui !== 'undefined', `Version: ${$.ui.version || 'unknown'}`);
+            } catch (e) {
+                addTest('jQuery UI loaded', false, e.message);
+            }
+            
+            // Test Bootstrap
+            try {
+                addTest('Bootstrap loaded', typeof bootstrap !== 'undefined', 'Bootstrap 5 detected');
+            } catch (e) {
+                addTest('Bootstrap loaded', false, e.message);
+            }
+            
+            // Test SOBIE API
+            try {
+                addTest('SOBIE API loaded', typeof window.sobieAPI !== 'undefined', 'API client available');
+                
+                if (window.sobieAPI) {
+                    addTest('SOBIE API methods', typeof window.sobieAPI.request === 'function', 'Core methods available');
+                }
+            } catch (e) {
+                addTest('SOBIE API loaded', false, e.message);
+            }
+            
+            // Test SOBIE Components
+            try {
+                addTest('SOBIE Components loaded', typeof window.sobieComponents !== 'undefined', 'UI components available');
+                
+                if (window.sobieComponents) {
+                    addTest('SOBIE Components methods', typeof window.sobieComponents.showToast === 'function', 'Core methods available');
+                }
+            } catch (e) {
+                addTest('SOBIE Components loaded', false, e.message);
+            }
+            
+            addInfo('Test completed!');
+        });
+        
+        // Global error handler
+        window.addEventListener('error', function(e) {
+            addTest('JavaScript Error Detected', false, `${e.message} at ${e.filename}:${e.lineno}`);
+        });
+        
+        // Promise rejection handler
+        window.addEventListener('unhandledrejection', function(e) {
+            addTest('Promise Rejection Detected', false, e.reason);
+        });
+    </script>
+</body>
+</html>

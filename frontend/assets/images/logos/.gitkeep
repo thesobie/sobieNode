@@ -1,0 +1,10 @@
+# Logos Directory
+
+Place SOBIE logos, university logos, and sponsor logos here.
+
+## Suggested Files:
+- sobie-logo.svg (main SOBIE logo)
+- sobie-logo-white.svg (white version for dark backgrounds)
+- sobie-favicon.ico (16x16, 32x32, 48x48)
+- university-logos/ (subdirectory for member institution logos)
+- sponsor-logos/ (subdirectory for conference sponsor logos)

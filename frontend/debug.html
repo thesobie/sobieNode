@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOBIE Debug - Loading Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .loading { color: orange; }
+        .success { color: green; }
+        .error { color: red; }
+        .debug-info { 
+            background: #f5f5f5; 
+            padding: 10px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <h1>SOBIE Platform - Debug Loading Test</h1>
+    
+    <div id="debug-output">
+        <p class="loading">🔄 Starting debug test...</p>
+    </div>
+
+    <!-- Load jQuery first -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    <!-- Load SOBIE scripts -->
+    <script src="./assets/js/sobie-api.js"></script>
+    <script src="./assets/js/sobie-components.js"></script>
+    
+    <script>
+        const debugOutput = document.getElementById('debug-output');
+        
+        function addDebugLine(message, type = 'info') {
+            const p = document.createElement('p');
+            p.className = type;
+            p.innerHTML = `${new Date().toLocaleTimeString()} - ${message}`;
+            debugOutput.appendChild(p);
+            console.log(message);
+        }
+
+        // Test loading sequence
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                addDebugLine('✅ DOM Content Loaded', 'success');
+                
+                // Test if jQuery is loaded
+                if (typeof $ !== 'undefined') {
+                    addDebugLine('✅ jQuery loaded successfully', 'success');
+                } else {
+                    addDebugLine('❌ jQuery not loaded', 'error');
+                }
+                
+                // Test if SOBIE API is loaded
+                if (typeof window.sobieAPI !== 'undefined') {
+                    addDebugLine('✅ SOBIE API loaded successfully', 'success');
+                } else {
+                    addDebugLine('❌ SOBIE API not loaded', 'error');
+                }
+                
+                // Test if SOBIE Components is loaded
+                if (typeof window.sobieComponents !== 'undefined') {
+                    addDebugLine('✅ SOBIE Components loaded successfully', 'success');
+                } else {
+                    addDebugLine('❌ SOBIE Components not loaded', 'error');
+                }
+                
+                // Test backend connection
+                addDebugLine('🔄 Testing backend connection...', 'loading');
+                
+                try {
+                    const response = await fetch('http://localhost:3000/health');
+                    if (response.ok) {
+                        const healthData = await response.json();
+                        addDebugLine('✅ Backend connection successful', 'success');
+                        addDebugLine(`Backend status: ${healthData.status}`, 'success');
+                    } else {
+                        addDebugLine(`❌ Backend responded with status: ${response.status}`, 'error');
+                    }
+                } catch (error) {
+                    addDebugLine(`❌ Backend connection failed: ${error.message}`, 'error');
+                }
+                
+                // Test SOBIE API instance
+                if (typeof window.sobieAPI !== 'undefined') {
+                    try {
+                        addDebugLine('🔄 Testing SOBIE API health check...', 'loading');
+                        const apiHealth = await window.sobieAPI.getHealth();
+                        addDebugLine('✅ SOBIE API health check successful', 'success');
+                    } catch (error) {
+                        addDebugLine(`❌ SOBIE API health check failed: ${error.message}`, 'error');
+                    }
+                }
+                
+                addDebugLine('🎉 Debug test completed!', 'success');
+                
+            } catch (error) {
+                addDebugLine(`❌ Critical error during initialization: ${error.message}`, 'error');
+                addDebugLine(`Stack trace: ${error.stack}`, 'error');
+            }
+        });
+        
+        // Catch any uncaught errors
+        window.addEventListener('error', function(event) {
+            addDebugLine(`❌ JavaScript Error: ${event.error.message}`, 'error');
+            addDebugLine(`File: ${event.filename}:${event.lineno}`, 'error');
+        });
+        
+        // Catch promise rejections
+        window.addEventListener('unhandledrejection', function(event) {
+            addDebugLine(`❌ Unhandled Promise Rejection: ${event.reason}`, 'error');
+        });
+    </script>
+</body>
+</html>

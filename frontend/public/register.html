@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - SOBIE Conference Platform</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom SOBIE Styles -->
+    <link href="../assets/css/sobie-styles.css" rel="stylesheet">
+    
+    <meta name="description" content="Create your SOBIE Conference Platform account">
+</head>
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center align-items-center min-vh-100">
+            <div class="col-md-8 col-lg-6">
+                <div class="card shadow">
+                    <div class="card-body p-4">
+                        <!-- Logo/Header -->
+                        <div class="text-center mb-4">
+                            <i class="bi bi-mortarboard-fill text-primary" style="font-size: 3rem;"></i>
+                            <h4 class="mt-2">SOBIE Conference</h4>
+                            <p class="text-muted">Create your account</p>
+                        </div>
+
+                        <!-- Registration Options -->
+                        <div class="row mb-4">
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-primary w-100" id="new-user-btn">
+                                    <i class="bi bi-person-plus me-2"></i>
+                                    New User
+                                </button>
+                            </div>
+                            <div class="col-6">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="returning-user-btn">
+                                    <i class="bi bi-search me-2"></i>
+                                    Find My Account
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- New User Registration Form -->
+                        <div id="new-user-form" class="registration-form">
+                            <form id="register-form">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="firstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="lastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" required>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="email" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="email" required>
+                                    <div class="form-text">We'll send you a magic link to complete registration</div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="organization" class="form-label">Organization/Institution</label>
+                                    <input type="text" class="form-control" id="organization" required>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="position" class="form-label">Position/Title</label>
+                                    <input type="text" class="form-control" id="position" placeholder="e.g., Professor, Student, Researcher">
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="phone" class="form-label">Phone Number (Optional)</label>
+                                    <input type="tel" class="form-control" id="phone">
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="newsletter" checked>
+                                        <label class="form-check-label" for="newsletter">
+                                            Send me updates about SOBIE conferences
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="terms" required>
+                                        <label class="form-check-label" for="terms">
+                                            I agree to the <a href="#" class="text-decoration-none">Terms of Service</a> and <a href="#" class="text-decoration-none">Privacy Policy</a>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary" id="register-btn">
+                                        <span id="register-text">Create Account & Send Magic Link</span>
+                                        <span id="register-spinner" class="loading-spinner d-none"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Account Recovery Form -->
+                        <div id="account-recovery-form" class="registration-form d-none">
+                            <div class="alert alert-info">
+                                <h6 class="alert-heading">Find Your Existing Account</h6>
+                                If you've attended SOBIE conferences before, your account may already exist. Let's help you find it!
+                            </div>
+
+                            <form id="recovery-form">
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="recoveryFirstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="recoveryFirstName">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="recoveryLastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="recoveryLastName">
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="recoveryEmail" class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" id="recoveryEmail">
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label for="recoveryInstitution" class="form-label">Institution (Optional)</label>
+                                    <input type="text" class="form-control" id="recoveryInstitution">
+                                    <div class="form-text">Help us identify your account</div>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-secondary" id="recovery-btn">
+                                        <span id="recovery-text">Search for My Account</span>
+                                        <span id="recovery-spinner" class="loading-spinner d-none"></span>
+                                    </button>
+                                </div>
+                            </form>
+
+                            <!-- Recovery Results -->
+                            <div id="recovery-results" class="mt-4 d-none">
+                                <!-- Results will be populated here -->
+                            </div>
+                        </div>
+
+                        <!-- Magic Link Options -->
+                        <div class="text-center mt-4">
+                            <div class="row">
+                                <div class="col-12">
+                                    <hr class="my-3">
+                                    <p class="text-muted small">Or sign in with:</p>
+                                </div>
+                            </div>
+                            <form id="magic-link-form">
+                                <div class="input-group mb-3">
+                                    <input type="email" class="form-control" id="magicEmail" placeholder="Enter your email">
+                                    <button type="submit" class="btn btn-outline-primary" id="magic-btn">
+                                        <span id="magic-text">Send Magic Link</span>
+                                        <span id="magic-spinner" class="loading-spinner d-none"></span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Alternative Actions -->
+                        <div class="text-center mt-3">
+                            <span class="text-muted">Already have an account? </span>
+                            <a href="login.html" class="text-decoration-none">
+                                Sign in with password
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Back to Home -->
+                <div class="text-center mt-3">
+                    <a href="/" class="text-decoration-none text-muted">
+                        <i class="bi bi-arrow-left me-1"></i>
+                        Back to Home
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SOBIE Platform Scripts -->
+    <script src="../assets/js/sobie-api.js"></script>
+    <script src="../assets/js/sobie-components.js"></script>
+    
+    <!-- Registration Page Script -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if already logged in
+            if (window.sobieAPI.isAuthenticated()) {
+                const userRole = window.sobieAPI.getUserRole();
+                const redirectUrl = userRole === 'admin' ? 
+                    '/admin/dashboard.html' : 
+                    '/user/dashboard.html';
+                window.location.href = redirectUrl;
+                return;
+            }
+
+            // Form toggle handlers
+            const newUserBtn = document.getElementById('new-user-btn');
+            const returningUserBtn = document.getElementById('returning-user-btn');
+            const newUserForm = document.getElementById('new-user-form');
+            const recoveryForm = document.getElementById('account-recovery-form');
+
+            newUserBtn.addEventListener('click', () => {
+                newUserBtn.classList.add('btn-primary');
+                newUserBtn.classList.remove('btn-outline-primary');
+                returningUserBtn.classList.add('btn-outline-secondary');
+                returningUserBtn.classList.remove('btn-secondary');
+                
+                newUserForm.classList.remove('d-none');
+                recoveryForm.classList.add('d-none');
+            });
+
+            returningUserBtn.addEventListener('click', () => {
+                returningUserBtn.classList.add('btn-secondary');
+                returningUserBtn.classList.remove('btn-outline-secondary');
+                newUserBtn.classList.add('btn-outline-primary');
+                newUserBtn.classList.remove('btn-primary');
+                
+                recoveryForm.classList.remove('d-none');
+                newUserForm.classList.add('d-none');
+            });
+
+            // New user registration
+            const registerForm = document.getElementById('register-form');
+            registerForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const formData = {
+                    name: {
+                        firstName: document.getElementById('firstName').value.trim(),
+                        lastName: document.getElementById('lastName').value.trim()
+                    },
+                    email: document.getElementById('email').value.trim(),
+                    affiliation: {
+                        organization: document.getElementById('organization').value.trim(),
+                        position: document.getElementById('position').value.trim()
+                    },
+                    contact: {
+                        phone: document.getElementById('phone').value.trim()
+                    },
+                    preferences: {
+                        newsletter: document.getElementById('newsletter').checked
+                    }
+                };
+
+                if (!formData.name.firstName || !formData.name.lastName || !formData.email || !formData.affiliation.organization) {
+                    window.sobieComponents.showToast('Please fill in all required fields', 'warning');
+                    return;
+                }
+
+                const registerBtn = document.getElementById('register-btn');
+                const registerText = document.getElementById('register-text');
+                const registerSpinner = document.getElementById('register-spinner');
+
+                registerBtn.disabled = true;
+                registerText.textContent = 'Creating Account...';
+                registerSpinner.classList.remove('d-none');
+
+                try {
+                    await window.sobieAPI.register(formData);
+                    window.sobieComponents.showToast('Account created! Check your email for the magic link.', 'success');
+                    
+                    // Clear form
+                    registerForm.reset();
+                    
+                } catch (error) {
+                    console.error('Registration failed:', error);
+                    let errorMessage = 'Registration failed. Please try again.';
+                    
+                    if (error.status === 409) {
+                        errorMessage = 'This email is already registered. Try "Find My Account" instead.';
+                    } else {
+                        errorMessage = window.sobieAPI.handleApiError(error, 'creating account');
+                    }
+                    
+                    window.sobieComponents.showToast(errorMessage, 'error');
+                    
+                } finally {
+                    registerBtn.disabled = false;
+                    registerText.textContent = 'Create Account & Send Magic Link';
+                    registerSpinner.classList.add('d-none');
+                }
+            });
+
+            // Account recovery
+            const recoveryFormElement = document.getElementById('recovery-form');
+            recoveryFormElement.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const searchData = {
+                    firstName: document.getElementById('recoveryFirstName').value.trim(),
+                    lastName: document.getElementById('recoveryLastName').value.trim(),
+                    email: document.getElementById('recoveryEmail').value.trim(),
+                    institution: document.getElementById('recoveryInstitution').value.trim()
+                };
+
+                // At least one field is required
+                if (!searchData.firstName && !searchData.lastName && !searchData.email && !searchData.institution) {
+                    window.sobieComponents.showToast('Please fill in at least one field to search', 'warning');
+                    return;
+                }
+
+                const recoveryBtn = document.getElementById('recovery-btn');
+                const recoveryText = document.getElementById('recovery-text');
+                const recoverySpinner = document.getElementById('recovery-spinner');
+
+                recoveryBtn.disabled = true;
+                recoveryText.textContent = 'Searching...';
+                recoverySpinner.classList.remove('d-none');
+
+                try {
+                    const response = await window.sobieAPI.request('/auth/find-account', {
+                        method: 'POST',
+                        body: JSON.stringify(searchData)
+                    });
+                    
+                    displayRecoveryResults(response);
+                    
+                } catch (error) {
+                    console.error('Account search failed:', error);
+                    const errorMessage = window.sobieAPI.handleApiError(error, 'searching for account');
+                    window.sobieComponents.showToast(errorMessage, 'error');
+                    
+                } finally {
+                    recoveryBtn.disabled = false;
+                    recoveryText.textContent = 'Search for My Account';
+                    recoverySpinner.classList.add('d-none');
+                }
+            });
+
+            // Magic link request
+            const magicForm = document.getElementById('magic-link-form');
+            magicForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = document.getElementById('magicEmail').value.trim();
+                if (!email) {
+                    window.sobieComponents.showToast('Please enter your email address', 'warning');
+                    return;
+                }
+
+                const magicBtn = document.getElementById('magic-btn');
+                const magicText = document.getElementById('magic-text');
+                const magicSpinner = document.getElementById('magic-spinner');
+
+                magicBtn.disabled = true;
+                magicText.textContent = 'Sending...';
+                magicSpinner.classList.remove('d-none');
+
+                try {
+                    await window.sobieAPI.request('/auth/magic-link', {
+                        method: 'POST',
+                        body: JSON.stringify({ email })
+                    });
+                    
+                    window.sobieComponents.showToast('Magic link sent! Check your email.', 'success');
+                    document.getElementById('magicEmail').value = '';
+                    
+                } catch (error) {
+                    console.error('Magic link request failed:', error);
+                    const errorMessage = window.sobieAPI.handleApiError(error, 'sending magic link');
+                    window.sobieComponents.showToast(errorMessage, 'error');
+                    
+                } finally {
+                    magicBtn.disabled = false;
+                    magicText.textContent = 'Send Magic Link';
+                    magicSpinner.classList.add('d-none');
+                }
+            });
+
+            // Display recovery results
+            function displayRecoveryResults(response) {
+                const resultsDiv = document.getElementById('recovery-results');
+                
+                if (response.matches && response.matches.length > 0) {
+                    let html = `
+                        <div class="alert alert-success">
+                            <h6 class="alert-heading">Found ${response.matches.length} matching account(s):</h6>
+                        </div>
+                    `;
+                    
+                    response.matches.forEach((match, index) => {
+                        html += `
+                            <div class="card mb-2">
+                                <div class="card-body">
+                                    <h6 class="card-title">${match.name.firstName} ${match.name.lastName}</h6>
+                                    <p class="card-text">
+                                        <small class="text-muted">${match.affiliation.organization}</small><br>
+                                        <small class="text-muted">${match.email}</small>
+                                    </p>
+                                    <button class="btn btn-sm btn-primary" onclick="recoverAccount('${match._id}', '${match.email}')">
+                                        Send Magic Link
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    resultsDiv.innerHTML = html;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading">No accounts found</h6>
+                            <p>We couldn't find any accounts matching your search. You can:</p>
+                            <ul>
+                                <li>Try different search terms</li>
+                                <li>Create a new account using the "New User" option</li>
+                                <li>Contact support if you're sure you have an account</li>
+                            </ul>
+                        </div>
+                    `;
+                }
+                
+                resultsDiv.classList.remove('d-none');
+            }
+
+            // Global function for account recovery
+            window.recoverAccount = async function(userId, email) {
+                try {
+                    await window.sobieAPI.request('/auth/recover-account', {
+                        method: 'POST',
+                        body: JSON.stringify({ userId, email, recoveryMethod: 'magic_link' })
+                    });
+                    
+                    window.sobieComponents.showToast('Magic link sent to ' + email, 'success');
+                    
+                } catch (error) {
+                    console.error('Account recovery failed:', error);
+                    const errorMessage = window.sobieAPI.handleApiError(error, 'recovering account');
+                    window.sobieComponents.showToast(errorMessage, 'error');
+                }
+            };
+
+            // Focus first input
+            document.getElementById('firstName').focus();
+        });
+    </script>
+</body>
+</html>

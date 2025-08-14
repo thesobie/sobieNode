@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Research Papers - SOBIE Conference Platform</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Normalize.css -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" rel="stylesheet">
+    
+    <!-- jQuery UI CSS -->
+    <link href="https://code.jquery.com/ui/1.13.0/themes/ui-lightness/jquery-ui.css" rel="stylesheet">
+    
+    <!-- Custom SOBIE Styles -->
+    <link href="../assets/css/sobie-styles.css" rel="stylesheet">
+    
+    <meta name="description" content="Browse and manage research papers for the SOBIE Conference">
+</head>
+<body>
+    <!-- Desktop Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm d-mobile-none desktop-nav">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="../index.html">
+                <img src="../assets/images/logos/sobie-logo-text.svg" alt="SOBIE Conference" height="40" class="me-2">
+            </a>
+            </a>
+            
+            <div class="navbar-nav me-auto">
+                <a class="nav-link" href="/">
+                    <i class="bi bi-house me-1"></i>Home
+                </a>
+                <a class="nav-link active" href="/public/research.html">
+                    <i class="bi bi-file-text me-1"></i>Research Papers
+                </a>
+                <a class="nav-link" href="/public/programs.html">
+                    <i class="bi bi-calendar-event me-1"></i>Programs
+                </a>
+                <a class="nav-link" href="/public/about.html">
+                    <i class="bi bi-info-circle me-1"></i>About
+                </a>
+            </div>
+            
+            <div class="navbar-nav" id="auth-menu">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container-fluid px-3 px-md-4">
+        <!-- Page Header -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center">
+                    <div>
+                        <h1 class="h3 mb-1">Research Papers</h1>
+                        <p class="text-muted mb-0">Browse and search academic research submissions</p>
+                    </div>
+                    <div class="mt-3 mt-md-0 d-flex gap-2">
+                        <button class="btn btn-outline-primary" id="btn-clear-filters">
+                            <i class="bi bi-x-circle me-1"></i>Clear Filters
+                        </button>
+                        <button class="btn btn-primary admin-only" id="btn-add-paper" style="display: none;">
+                            <i class="bi bi-plus me-1"></i>Add Paper
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Filters -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <!-- Search Bar -->
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="Search papers, authors, keywords..." 
+                                           id="paper-search" data-search="papers">
+                                    <button class="btn btn-outline-secondary" type="button" id="search-btn">
+                                        <i class="bi bi-search"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <!-- Admin-only sorting controls -->
+                            <div class="col-md-4 admin-only" style="display: none;">
+                                <div class="d-flex gap-2">
+                                    <select class="form-select" id="sort-select">
+                                        <option value="title">Sort by Title</option>
+                                        <option value="date">Sort by Date</option>
+                                        <option value="author">Sort by Author</option>
+                                        <option value="type">Sort by Type</option>
+                                    </select>
+                                    <button class="btn btn-outline-secondary" id="sort-direction" data-direction="asc" title="Sort Direction">
+                                        <i class="bi bi-sort-alpha-down"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Filter Buttons -->
+                        <div class="filter-buttons" data-multi-select="true">
+                            <button class="filter-btn" data-filter="research-paper">
+                                <i class="bi bi-file-text me-1"></i>Research Papers
+                            </button>
+                            <button class="filter-btn" data-filter="case-study">
+                                <i class="bi bi-clipboard-data me-1"></i>Case Studies
+                            </button>
+                            <button class="filter-btn" data-filter="review">
+                                <i class="bi bi-eye me-1"></i>Reviews
+                            </button>
+                            <button class="filter-btn" data-filter="poster">
+                                <i class="bi bi-image me-1"></i>Posters
+                            </button>
+                            <button class="filter-btn" data-filter="abstract">
+                                <i class="bi bi-card-text me-1"></i>Abstracts
+                            </button>
+                            <button class="filter-btn" data-filter="biomedical">
+                                <i class="bi bi-heart-pulse me-1"></i>Biomedical
+                            </button>
+                            <button class="filter-btn" data-filter="engineering">
+                                <i class="bi bi-gear me-1"></i>Engineering
+                            </button>
+                            <button class="filter-btn" data-filter="technology">
+                                <i class="bi bi-cpu me-1"></i>Technology
+                            </button>
+                        </div>
+
+                        <!-- Results Counter -->
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="results-counter text-muted">Loading papers...</span>
+                            <div class="view-toggle btn-group" role="group">
+                                <input type="radio" class="btn-check" name="view-type" id="view-cards" value="cards" checked>
+                                <label class="btn btn-outline-secondary btn-sm" for="view-cards">
+                                    <i class="bi bi-grid-3x3-gap"></i>
+                                </label>
+                                <input type="radio" class="btn-check" name="view-type" id="view-list" value="list">
+                                <label class="btn btn-outline-secondary btn-sm" for="view-list">
+                                    <i class="bi bi-list"></i>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Drag & Drop Organization (Admin Only) -->
+        <div class="row mb-4 admin-only" style="display: none;">
+            <div class="col-12">
+                <h5 class="mb-3">
+                    <i class="bi bi-collection me-2"></i>
+                    Organize Papers by Category
+                    <small class="text-muted ms-2">(Drag cards between sections)</small>
+                </h5>
+            </div>
+        </div>
+
+        <!-- Drop Zones (Admin Only) -->
+        <div class="row g-3 mb-4 admin-only" style="display: none;">
+            <div class="col-md-4">
+                <div class="drop-zone" data-zone="to-review">
+                    <h6 class="text-center mb-2">
+                        <i class="bi bi-clock text-warning"></i>
+                        To Review
+                    </h6>
+                    <p class="text-center text-muted small mb-0">
+                        Drag papers here for review
+                    </p>
+                    <div class="zone-content">
+                        <!-- Papers will be populated here -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="drop-zone" data-zone="under-review">
+                    <h6 class="text-center mb-2">
+                        <i class="bi bi-eye text-info"></i>
+                        Under Review
+                    </h6>
+                    <p class="text-center text-muted small mb-0">
+                        Currently being reviewed
+                    </p>
+                    <div class="zone-content">
+                        <!-- Papers will be populated here -->
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="drop-zone" data-zone="accepted">
+                    <h6 class="text-center mb-2">
+                        <i class="bi bi-check-circle text-success"></i>
+                        Accepted
+                    </h6>
+                    <p class="text-center text-muted small mb-0">
+                        Ready for conference
+                    </p>
+                    <div class="zone-content">
+                        <!-- Papers will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Papers Grid/List -->
+        <div class="row" id="papers-container">
+            <!-- Papers will be populated here by JavaScript -->
+        </div>
+
+        <!-- Load More Button -->
+        <div class="row mt-4">
+            <div class="col-12 text-center">
+                <button class="btn btn-outline-primary" id="load-more-btn" style="display: none;">
+                    <i class="bi bi-arrow-down-circle me-1"></i>
+                    Load More Papers
+                </button>
+                <div id="loading-indicator" class="d-none">
+                    <span class="loading-spinner me-2"></span>
+                    Loading papers...
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav d-desktop-none">
+        <div class="nav-item">
+            <a href="/" class="nav-link">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="./research.html" class="nav-link active">
+                <i class="bi bi-file-text"></i>
+                <span>Research</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="./programs.html" class="nav-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Programs</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="../user/dashboard.html" class="nav-link">
+                <i class="bi bi-person"></i>
+                <span>Profile</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="#" class="nav-link" id="mobile-menu-btn">
+                <i class="bi bi-three-dots"></i>
+                <span>More</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Paper Detail Modal -->
+    <div class="modal fade" id="paperDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="paperModalTitle">Paper Details</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="paperModalBody">
+                    <!-- Paper details will be loaded here -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary admin-only" id="edit-paper-btn" style="display: none;">Edit Paper</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Libraries -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- SOBIE Platform Scripts -->
+    <script src="../assets/js/sobie-api.js"></script>
+    <script src="../assets/js/sobie-components.js"></script>
+    
+    <!-- Page-specific Script -->
+    <script>
+        // Research Papers Page Controller
+        class ResearchPapersPage {
+            constructor() {
+                this.papers = [];
+                this.filteredPapers = [];
+                this.currentPage = 1;
+                this.papersPerPage = 12;
+                this.currentSort = 'title';
+                this.sortDirection = 'asc';
+                this.currentSearch = '';
+                this.viewType = 'cards';
+                
+                this.init();
+            }
+
+            async init() {
+                // Initialize authentication
+                await this.initializeAuth();
+                
+                // Load papers
+                await this.loadPapers();
+                
+                // Setup event listeners
+                this.setupEventListeners();
+                
+                // Note: initializeDropZones will be called by checkAdminAccess if user is admin
+                
+                console.log('Research Papers page initialized');
+            }
+
+            async initializeAuth() {
+                const authMenu = document.getElementById('auth-menu');
+                
+                if (window.sobieAPI.isAuthenticated()) {
+                    const userRole = window.sobieAPI.getUserRole();
+                    authMenu.innerHTML = `
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i>${userRole === 'admin' ? 'Admin' : 'User'}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="/user/dashboard.html">Dashboard</a></li>
+                                ${userRole === 'admin' ? '<li><a class="dropdown-item" href="/admin/dashboard.html">Admin Panel</a></li>' : ''}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">Logout</a></li>
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    authMenu.innerHTML = '<a class="nav-link" href="/public/login.html">Login</a>';
+                }
+            }
+
+            async loadPapers() {
+                try {
+                    document.getElementById('loading-indicator').classList.remove('d-none');
+                    
+                    const filters = {
+                        page: this.currentPage,
+                        limit: this.papersPerPage,
+                        sort: this.currentSort,
+                        direction: this.sortDirection,
+                        search: this.currentSearch
+                    };
+
+                    const response = await window.sobieAPI.getResearchPapers(filters);
+                    
+                    if (this.currentPage === 1) {
+                        this.papers = response.papers || [];
+                    } else {
+                        this.papers.push(...(response.papers || []));
+                    }
+                    
+                    this.filteredPapers = [...this.papers];
+                    this.renderPapers();
+                    this.updateResultsCounter();
+                    
+                    // Show/hide load more button
+                    const loadMoreBtn = document.getElementById('load-more-btn');
+                    if (response.hasMore) {
+                        loadMoreBtn.style.display = 'block';
+                    } else {
+                        loadMoreBtn.style.display = 'none';
+                    }
+                    
+                } catch (error) {
+                    console.error('Failed to load papers:', error);
+                    window.sobieComponents.showToast('Failed to load research papers', 'error');
+                } finally {
+                    document.getElementById('loading-indicator').classList.add('d-none');
+                }
+            }
+
+            renderPapers() {
+                const container = document.getElementById('papers-container');
+                
+                if (this.filteredPapers.length === 0) {
+                    container.innerHTML = `
+                        <div class="col-12 text-center py-5">
+                            <i class="bi bi-file-text text-muted" style="font-size: 4rem;"></i>
+                            <h4 class="text-muted mt-3">No Papers Found</h4>
+                            <p class="text-muted">Try adjusting your search or filters</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                if (this.viewType === 'cards') {
+                    this.renderCardView(container);
+                } else {
+                    this.renderListView(container);
+                }
+                
+                // Re-initialize drag and drop
+                window.sobieComponents.refreshCards();
+            }
+
+            renderCardView(container) {
+                const cardsHtml = this.filteredPapers.map(paper => `
+                    <div class="col-lg-4 col-md-6 mb-4">
+                        <div class="card research-card h-100" 
+                             data-record-id="${paper._id}" 
+                             data-record-type="research"
+                             data-filterable="${paper.type},${paper.keywords?.join(',')}"
+                             onclick="researchPage.showPaperDetails('${paper._id}')">
+                            <div class="card-header">
+                                <h6 class="mb-0 editable-field" 
+                                    data-field="title" 
+                                    data-record-id="${paper._id}" 
+                                    data-record-type="research"
+                                    onclick="event.stopPropagation()">
+                                    ${paper.title}
+                                </h6>
+                                <span class="research-type">${paper.type}</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="authors mb-2">
+                                    ${paper.authors?.map(author => 
+                                        `<span class="clickable-author" onclick="event.stopPropagation(); researchPage.filterByAuthor('${author}')">${author}</span>`
+                                    ).join(', ') || 'No authors listed'}
+                                </div>
+                                <div class="institutions mb-2">
+                                    ${paper.institutions?.map(inst => 
+                                        `<span class="clickable-institution" onclick="event.stopPropagation(); researchPage.filterByInstitution('${inst}')">${inst}</span>`
+                                    ).join(', ') || 'No institutions listed'}
+                                </div>
+                                <p class="card-text editable-field" 
+                                   data-field="abstract" 
+                                   data-record-id="${paper._id}" 
+                                   data-record-type="research"
+                                   data-field-type="textarea"
+                                   onclick="event.stopPropagation()">
+                                    ${paper.abstract ? this.truncateText(paper.abstract, 150) : 'No abstract available'}
+                                </p>
+                                <div class="keywords">
+                                    ${paper.keywords?.map(keyword => 
+                                        `<span class="keyword-tag clickable-keyword" onclick="event.stopPropagation(); researchPage.filterByKeyword('${keyword}')">${keyword}</span>`
+                                    ).join('') || ''}
+                                </div>
+                            </div>
+                            <div class="card-footer bg-transparent">
+                                <small class="text-muted">
+                                    <i class="bi bi-calendar me-1"></i>
+                                    ${paper.submissionDate ? new Date(paper.submissionDate).toLocaleDateString() : 'Date not available'}
+                                </small>
+                                ${paper.fileUrl ? 
+                                    `<a href="${paper.fileUrl}" class="btn btn-sm btn-outline-primary float-end" onclick="event.stopPropagation()">
+                                        <i class="bi bi-download"></i>
+                                    </a>` : 
+                                    ''
+                                }
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                container.innerHTML = cardsHtml;
+            }
+
+            renderListView(container) {
+                const listHtml = `
+                    <div class="col-12">
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Title</th>
+                                        <th>Authors</th>
+                                        <th>Type</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${this.filteredPapers.map(paper => `
+                                        <tr data-record-id="${paper._id}" 
+                                            data-record-type="research"
+                                            data-filterable="${paper.type},${paper.keywords?.join(',')}"
+                                            onclick="researchPage.showPaperDetails('${paper._id}')">
+                                            <td>
+                                                <strong class="editable-field" 
+                                                        data-field="title" 
+                                                        data-record-id="${paper._id}" 
+                                                        data-record-type="research"
+                                                        onclick="event.stopPropagation()">
+                                                    ${paper.title}
+                                                </strong>
+                                                <br>
+                                                <small class="text-muted">${paper.abstract ? this.truncateText(paper.abstract, 100) : 'No abstract'}</small>
+                                            </td>
+                                            <td>
+                                                ${paper.authors?.map(author => 
+                                                    `<span class="clickable-author" onclick="event.stopPropagation(); researchPage.filterByAuthor('${author}')">${author}</span>`
+                                                ).join('<br>') || 'No authors'}
+                                            </td>
+                                            <td>
+                                                <span class="badge bg-secondary">${paper.type}</span>
+                                            </td>
+                                            <td>
+                                                ${paper.submissionDate ? new Date(paper.submissionDate).toLocaleDateString() : 'N/A'}
+                                            </td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    ${paper.fileUrl ? 
+                                                        `<a href="${paper.fileUrl}" class="btn btn-sm btn-outline-primary" onclick="event.stopPropagation()">
+                                                            <i class="bi bi-download"></i>
+                                                        </a>` : 
+                                                        ''
+                                                    }
+                                                    <button class="btn btn-sm btn-outline-secondary" onclick="event.stopPropagation(); researchPage.showPaperDetails('${paper._id}')">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = listHtml;
+            }
+
+            setupEventListeners() {
+                // Search
+                const searchInput = document.getElementById('paper-search');
+                let searchTimeout;
+                searchInput.addEventListener('input', (e) => {
+                    clearTimeout(searchTimeout);
+                    searchTimeout = setTimeout(() => {
+                        this.currentSearch = e.target.value;
+                        this.currentPage = 1;
+                        this.loadPapers();
+                    }, 300);
+                });
+
+                // Sort
+                document.getElementById('sort-select').addEventListener('change', (e) => {
+                    this.currentSort = e.target.value;
+                    this.currentPage = 1;
+                    this.loadPapers();
+                });
+
+                document.getElementById('sort-direction').addEventListener('click', (e) => {
+                    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+                    e.target.innerHTML = this.sortDirection === 'asc' ? 
+                        '<i class="bi bi-sort-alpha-down"></i>' : 
+                        '<i class="bi bi-sort-alpha-up"></i>';
+                    this.currentPage = 1;
+                    this.loadPapers();
+                });
+
+                // View toggle
+                document.querySelectorAll('input[name="view-type"]').forEach(radio => {
+                    radio.addEventListener('change', (e) => {
+                        this.viewType = e.target.value;
+                        this.renderPapers();
+                    });
+                });
+
+                // Clear filters
+                document.getElementById('btn-clear-filters').addEventListener('click', () => {
+                    window.sobieComponents.clearAllFilters();
+                    this.currentSearch = '';
+                    searchInput.value = '';
+                    this.currentPage = 1;
+                    this.loadPapers();
+                });
+
+                // Add paper
+                document.getElementById('btn-add-paper').addEventListener('click', () => {
+                    if (window.sobieAPI.isAuthenticated()) {
+                        window.location.href = '/user/submissions.html';
+                    } else {
+                        window.location.href = '/public/login.html';
+                    }
+                });
+
+                // Load more
+                document.getElementById('load-more-btn').addEventListener('click', () => {
+                    this.currentPage++;
+                    this.loadPapers();
+                });
+            }
+
+            initializeDropZones() {
+                // Organize papers into zones based on their status
+                this.papers.forEach(paper => {
+                    const zone = paper.status || 'to-review';
+                    const zoneElement = document.querySelector(`[data-zone="${zone}"] .zone-content`);
+                    if (zoneElement) {
+                        // Create mini card for zone
+                        const miniCard = document.createElement('div');
+                        miniCard.className = 'card card-sm mb-2 research-card';
+                        miniCard.setAttribute('data-record-id', paper._id);
+                        miniCard.setAttribute('data-record-type', 'research');
+                        miniCard.innerHTML = `
+                            <div class="card-body p-2">
+                                <h6 class="card-title mb-1" style="font-size: 0.8rem;">${this.truncateText(paper.title, 50)}</h6>
+                                <small class="text-muted">${paper.authors?.[0] || 'Unknown Author'}</small>
+                            </div>
+                        `;
+                        zoneElement.appendChild(miniCard);
+                        
+                        // Mark zone as having content
+                        zoneElement.closest('.drop-zone').classList.add('has-content');
+                    }
+                });
+            }
+
+            async showPaperDetails(paperId) {
+                try {
+                    const paper = await window.sobieAPI.getResearchPaper(paperId);
+                    
+                    document.getElementById('paperModalTitle').textContent = paper.title;
+                    document.getElementById('paperModalBody').innerHTML = `
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>Abstract</h6>
+                                <p>${paper.abstract || 'No abstract available'}</p>
+                                
+                                <h6>Authors</h6>
+                                <p>${paper.authors?.join(', ') || 'No authors listed'}</p>
+                                
+                                <h6>Institutions</h6>
+                                <p>${paper.institutions?.join(', ') || 'No institutions listed'}</p>
+                                
+                                <h6>Keywords</h6>
+                                <p>${paper.keywords?.map(k => `<span class="badge bg-light text-dark me-1">${k}</span>`).join('') || 'No keywords'}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h6>Details</h6>
+                                <p><strong>Type:</strong> ${paper.type}</p>
+                                <p><strong>Submission Date:</strong> ${paper.submissionDate ? new Date(paper.submissionDate).toLocaleDateString() : 'N/A'}</p>
+                                <p><strong>Status:</strong> ${paper.status || 'To Review'}</p>
+                                
+                                ${paper.fileUrl ? 
+                                    `<a href="${paper.fileUrl}" class="btn btn-primary btn-sm w-100 mb-2">
+                                        <i class="bi bi-download me-1"></i>Download Paper
+                                    </a>` : 
+                                    ''
+                                }
+                            </div>
+                        </div>
+                    `;
+                    
+                    const modal = new bootstrap.Modal(document.getElementById('paperDetailModal'));
+                    modal.show();
+                    
+                } catch (error) {
+                    console.error('Failed to load paper details:', error);
+                    window.sobieComponents.showToast('Failed to load paper details', 'error');
+                }
+            }
+
+            updateResultsCounter() {
+                const counter = document.querySelector('.results-counter');
+                counter.textContent = `${this.filteredPapers.length} papers found`;
+            }
+
+            truncateText(text, maxLength) {
+                if (!text || text.length <= maxLength) return text;
+                return text.substring(0, maxLength).trim() + '...';
+            }
+
+            // Filter methods
+            filterByAuthor(author) {
+                console.log('Filter by author:', author);
+                // Implementation for author filtering
+            }
+
+            filterByInstitution(institution) {
+                console.log('Filter by institution:', institution);
+                // Implementation for institution filtering
+            }
+
+            filterByKeyword(keyword) {
+                console.log('Filter by keyword:', keyword);
+                // Implementation for keyword filtering
+            }
+        }
+
+        // Initialize page
+        let researchPage;
+        document.addEventListener('DOMContentLoaded', async () => {
+            researchPage = new ResearchPapersPage();
+            
+            // Check admin status and show/hide admin-only elements
+            await checkAdminAccess();
+        });
+
+        // Check admin access and show admin elements
+        async function checkAdminAccess() {
+            try {
+                const user = await window.sobieAPI.getCurrentUser();
+                if (user && user.role === 'admin') {
+                    // Show all admin-only elements
+                    const adminElements = document.querySelectorAll('.admin-only');
+                    adminElements.forEach(element => {
+                        element.style.display = '';
+                    });
+                    
+                    // Initialize drag & drop zones for admin users
+                    if (researchPage && researchPage.initializeDropZones) {
+                        researchPage.initializeDropZones();
+                    }
+                    
+                    console.log('Admin access granted - showing admin controls');
+                }
+            } catch (error) {
+                console.log('User not authenticated or not admin - hiding admin controls');
+                // Admin elements remain hidden by default
+            }
+        }
+
+        // Global logout function
+        async function logout() {
+            try {
+                await window.sobieAPI.logout();
+                window.location.href = '/';
+            } catch (error) {
+                console.error('Logout failed:', error);
+                window.sobieAPI.clearAuth();
+                window.location.href = '/';
+            }
+        }
+    </script>
+</body>
+</html>

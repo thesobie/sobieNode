@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loading Screen Test</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="./assets/css/sobie-styles.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen" class="position-fixed top-0 start-0 w-100 h-100 bg-white d-flex align-items-center justify-content-center" style="z-index: 9999;">
+        <div class="text-center">
+            <div class="loading-spinner mb-3" style="width: 3rem; height: 3rem;"></div>
+            <h5 class="text-muted">Loading SOBIE Platform...</h5>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div id="main-content" style="padding: 20px;">
+        <h1>Main Content</h1>
+        <p>This should be visible after the loading screen disappears.</p>
+        <div id="debug-info">
+            <h3>Debug Information:</h3>
+            <div id="log"></div>
+        </div>
+    </div>
+
+    <script>
+        const log = document.getElementById('log');
+        
+        function addLog(message) {
+            console.log(message);
+            const p = document.createElement('p');
+            p.textContent = new Date().toLocaleTimeString() + ': ' + message;
+            log.appendChild(p);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            addLog('DOM Content Loaded');
+            
+            // Test the exact same logic as the main page
+            setTimeout(() => {
+                addLog('Timeout reached, attempting to hide loading screen');
+                const loadingScreen = document.getElementById('loading-screen');
+                addLog('Loading screen element: ' + (loadingScreen ? 'found' : 'not found'));
+                
+                if (loadingScreen) {
+                    addLog('Setting display to none');
+                    loadingScreen.style.display = 'none';
+                    addLog('Loading screen hidden successfully');
+                } else {
+                    addLog('ERROR: Loading screen element not found!');
+                }
+            }, 2000); // 2 second delay for testing
+        });
+    </script>
+</body>
+</html>

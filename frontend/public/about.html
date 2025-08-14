@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About - SOBIE Conference Platform</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Custom SOBIE Styles -->
+    <link href="../assets/css/sobie-styles.css" rel="stylesheet">
+    
+    <meta name="description" content="Learn about the SOBIE Conference and its mission">
+</head>
+<body>
+    <!-- Desktop Navigation -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm d-mobile-none desktop-nav">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="../index.html">
+                <img src="../assets/images/logos/sobie-logo-text.svg" alt="SOBIE Conference" height="40" class="me-2">
+            </a>
+            
+            <div class="navbar-nav me-auto">
+                <a class="nav-link" href="../index.html">
+                    <i class="bi bi-house me-1"></i>Home
+                </a>
+                <a class="nav-link" href="./research.html">
+                    <i class="bi bi-file-text me-1"></i>Research Papers
+                </a>
+                <a class="nav-link" href="./programs.html">
+                    <i class="bi bi-calendar-event me-1"></i>Programs
+                </a>
+                <a class="nav-link active" href="./about.html">
+                    <i class="bi bi-info-circle me-1"></i>About
+                </a>
+            </div>
+            
+            <div class="navbar-nav" id="auth-menu">
+                <!-- Populated by JavaScript -->
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="container my-4">
+        <div class="row">
+            <div class="col-12">
+                <h1 class="mb-4">
+                    <i class="bi bi-info-circle me-2"></i>
+                    About SOBIE Conference
+                </h1>
+                
+                <div class="row">
+                    <div class="col-lg-8">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h2 class="card-title">Mission Statement</h2>
+                                <p class="card-text">
+                                    The SOBIE Conference Platform is designed to facilitate academic collaboration and 
+                                    knowledge sharing within the research community. Our mission is to provide a 
+                                    comprehensive digital environment for managing research papers, organizing conference 
+                                    programs, and fostering meaningful academic discourse.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h2 class="card-title">Platform Features</h2>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h5><i class="bi bi-file-text text-primary me-2"></i>Research Management</h5>
+                                        <p>Upload, organize, and manage research papers with advanced metadata and search capabilities.</p>
+                                        
+                                        <h5><i class="bi bi-calendar-event text-success me-2"></i>Program Building</h5>
+                                        <p>Create conference programs through intuitive drag-and-drop organization of papers and sessions.</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h5><i class="bi bi-people text-warning me-2"></i>Collaboration Tools</h5>
+                                        <p>Connect with fellow researchers and collaborate on projects and presentations.</p>
+                                        
+                                        <h5><i class="bi bi-graph-up text-info me-2"></i>Analytics & Insights</h5>
+                                        <p>Track engagement, participation, and research trends through comprehensive analytics.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h2 class="card-title">Historical Data</h2>
+                                <p class="card-text">
+                                    Our platform maintains a rich archive of historical conference data, spanning multiple years 
+                                    and including detailed records of past participants, presentations, and research contributions. 
+                                    This historical perspective helps inform future conference planning and research direction.
+                                </p>
+                                <div class="row text-center">
+                                    <div class="col-3">
+                                        <div class="card border-primary">
+                                            <div class="card-body">
+                                                <h3 class="text-primary" id="stats-authors">--</h3>
+                                                <p class="small mb-0">Authors</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="card border-success">
+                                            <div class="card-body">
+                                                <h3 class="text-success" id="stats-papers">--</h3>
+                                                <p class="small mb-0">Papers</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="card border-warning">
+                                            <div class="card-body">
+                                                <h3 class="text-warning" id="stats-institutions">--</h3>
+                                                <p class="small mb-0">Institutions</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3">
+                                        <div class="card border-info">
+                                            <div class="card-body">
+                                                <h3 class="text-info" id="stats-programs">--</h3>
+                                                <p class="small mb-0">Programs</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-lg-4">
+                        <div class="card mb-4">
+                            <div class="card-header bg-primary text-white">
+                                <h5 class="card-title mb-0">Quick Links</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-grid gap-2">
+                                    <a href="./research.html" class="btn btn-outline-primary">
+                                        <i class="bi bi-file-text me-2"></i>Browse Research Papers
+                                    </a>
+                                    <a href="./programs.html" class="btn btn-outline-success">
+                                        <i class="bi bi-calendar-event me-2"></i>View Programs
+                                    </a>
+                                    <a href="../user/dashboard.html" class="btn btn-outline-info">
+                                        <i class="bi bi-person me-2"></i>User Dashboard
+                                    </a>
+                                    <a href="./login.html" class="btn btn-outline-warning">
+                                        <i class="bi bi-box-arrow-in-right me-2"></i>Login / Register
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-header bg-success text-white">
+                                <h5 class="card-title mb-0">Support & Contact</h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="card-text">
+                                    Need help using the platform? Our support team is here to assist.
+                                </p>
+                                <div class="d-grid gap-2">
+                                    <button class="btn btn-outline-success" onclick="showContactInfo()">
+                                        <i class="bi bi-envelope me-2"></i>Contact Support
+                                    </button>
+                                    <button class="btn btn-outline-info" onclick="showHelp()">
+                                        <i class="bi bi-question-circle me-2"></i>Help & Documentation
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Mobile Bottom Navigation -->
+    <nav class="mobile-bottom-nav d-desktop-none fixed-bottom bg-white border-top">
+        <div class="nav-item">
+            <a href="../index.html" class="nav-link">
+                <i class="bi bi-house"></i>
+                <span>Home</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="./research.html" class="nav-link">
+                <i class="bi bi-file-text"></i>
+                <span>Research</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="./programs.html" class="nav-link">
+                <i class="bi bi-calendar-event"></i>
+                <span>Programs</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="../user/dashboard.html" class="nav-link">
+                <i class="bi bi-person"></i>
+                <span>Profile</span>
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="#" class="nav-link" id="mobile-menu-btn">
+                <i class="bi bi-three-dots"></i>
+                <span>More</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../assets/js/sobie-api.js"></script>
+    <script src="../assets/js/sobie-components.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Load stats
+            try {
+                if (window.sobieAPI) {
+                    const stats = await window.sobieAPI.getStats();
+                    document.getElementById('stats-papers').textContent = stats.papers || 0;
+                    document.getElementById('stats-programs').textContent = stats.programs || 0;
+                    document.getElementById('stats-authors').textContent = stats.authors || 0;
+                    document.getElementById('stats-institutions').textContent = stats.institutions || 0;
+                }
+            } catch (error) {
+                console.error('Failed to load stats:', error);
+            }
+
+            // Initialize authentication
+            if (window.sobieAPI && window.sobieAPI.isAuthenticated()) {
+                const userRole = window.sobieAPI.getUserRole();
+
+                // Setup auth menu
+                const authMenu = document.getElementById('auth-menu');
+                if (authMenu) {
+                    authMenu.innerHTML = `
+                        <div class="dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-person-circle me-1"></i>
+                                ${userRole === 'admin' ? 'Admin' : 'User'}
+                            </a>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="../user/dashboard.html">
+                                    <i class="bi bi-speedometer2 me-2"></i>Dashboard
+                                </a></li>
+                                ${userRole === 'admin' ? 
+                                    '<li><a class="dropdown-item" href="../admin/dashboard.html"><i class="bi bi-gear me-2"></i>Admin Panel</a></li>' : 
+                                    ''
+                                }
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="#" onclick="logout()">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a></li>
+                            </ul>
+                        </div>
+                    `;
+                }
+            } else {
+                // Show login link
+                const authMenu = document.getElementById('auth-menu');
+                if (authMenu) {
+                    authMenu.innerHTML = `
+                        <a class="nav-link" href="./login.html">
+                            <i class="bi bi-box-arrow-in-right me-1"></i>Login
+                        </a>
+                    `;
+                }
+            }
+        });
+
+        function logout() {
+            if (window.sobieAPI) {
+                window.sobieAPI.logout();
+                window.location.href = '../index.html';
+            }
+        }
+
+        function showContactInfo() {
+            window.sobieComponents?.showToast('Contact information: support@sobie-conference.org', 'info');
+        }
+
+        function showHelp() {
+            window.sobieComponents?.showToast('Help documentation coming soon!', 'info');
+        }
+    </script>
+</body>
+</html>
