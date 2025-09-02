@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+    
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>SOBIE '26</title>
+ 
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="sobie-icon.svg">
+    <link rel="icon" type="image/png" sizes="32x32" href="sobie-icon.svg">
+    <link rel="icon" type="image/png" sizes="16x16" href="sobie-icon.svg">
+    <link rel="apple-touch-icon" sizes="180x180" href="sobie-icon.svg">
+    <link rel="manifest" href="data:application/json;base64,eyJuYW1lIjoiU09CSUUgQ29uZmVyZW5jZSIsInNob3J0X25hbWUiOiJTT0JJRSIsImljb25zIjpbeyJzcmMiOiJzb2JpZS1pY29uLnN2ZyIsInNpemVzIjoiYW55IiwidHlwZSI6ImltYWdlL3N2Zyt4bWwifV19">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --sobie-primary: #2563eb;
+            --sobie-secondary: #1e40af;
+            --sobie-accent: #3b82f6;
+            --sobie-light: #f8fafc;
+            --sobie-dark: #1e293b;
+            --sobie-gradient: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--sobie-light);
+            color: var(--sobie-dark);
+            line-height: 1.6;
+        }
+
+        .hero-section {
+            background: var(--sobie-gradient);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="0.5"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+            opacity: 0.3;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            color: white;
+        }
+
+        .logo-container {
+            margin-bottom: 2rem;
+        }
+
+        .logo {
+            width: 120px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1rem;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .logo i {
+            font-size: 3rem;
+            color: white;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .hero-subtitle {
+            font-size: 1.5rem;
+            font-weight: 300;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .hero-description {
+            font-size: 1.1rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+            opacity: 0.8;
+            line-height: 1.7;
+        }
+
+        .conference-details {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            margin-bottom: 2rem;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .detail-item i {
+            opacity: 0.9;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.75rem 1.5rem;
+            border-radius: 50px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 2rem;
+        }
+
+        .btn-primary-custom {
+            background: white;
+            color: var(--sobie-primary);
+            border: none;
+            padding: 1rem 2rem;
+            font-weight: 600;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-primary-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            color: var(--sobie-secondary);
+        }
+
+        .btn-outline-custom {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            padding: 1rem 2rem;
+            font-weight: 500;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-custom:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: white;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .info-section {
+            padding: 5rem 0;
+            background: white;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            text-align: left;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.1);
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            background: var(--sobie-gradient);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            flex-shrink: 0;
+        }
+
+        .info-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .info-title {
+            font-size: 1.4rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--sobie-dark);
+        }
+
+        /* New styles for inline icon layout */
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .info-header .info-title {
+            margin-bottom: 0;
+            flex: 1;
+        }
+
+        .info-description {
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        .footer-section {
+            background: var(--sobie-dark);
+            color: white;
+            padding: 3rem 0 2rem;
+            text-align: center;
+        }
+
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .social-link {
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .social-link:hover {
+            background: var(--sobie-primary);
+            color: white;
+            transform: translateY(-2px);
+            border-color: var(--sobie-primary);
+        }
+
+        @media (max-width: 768px) {
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .hero-subtitle {
+                font-size: 1.2rem;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn-primary-custom,
+            .btn-outline-custom {
+                width: 280px;
+                justify-content: center;
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(255, 255, 255, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0);
+            }
+        }
+
+        /* Icon styling for tighter layout */
+        .bi {
+            margin-right: 0.5rem !important;
+            vertical-align: middle;
+        }
+
+        /* Adjust specific icon spacing */
+        .me-2 {
+            margin-right: 0.5rem !important;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <!-- Floating Notification -->
+        <div class="position-absolute top-0 end-0 m-3" style="z-index: 1000; max-width: 300px;">
+            <div class="alert alert-success alert-dismissible fade show shadow-sm border-0" role="alert" style="background: rgba(40, 167, 69, 0.95); backdrop-filter: blur(10px);">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-newspaper text-white me-2"></i>
+                    <small class="text-white fw-bold">2025 Proceedings Available!</small>
+                </div>
+                <div class="mt-1">
+                    <button type="button" class="btn btn-sm btn-light" data-bs-toggle="modal" data-bs-target="#archiveModal" style="font-size: 0.75rem;">
+                        <i class="bi bi-file-pdf me-1"></i>View Archives
+                    </button>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+        
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="hero-content">
+                        <div class="logo-container">
+                            <div class="logo pulse">
+                                <img src="sobie-icon.svg" alt="SOBIE Conference Logo" style="width: 80px; height: 80px; filter: brightness(0) invert(1);">
+                            </div>
+                        </div>
+                        
+                        <div class="status-badge">
+                            <i class="bi bi-calendar-plus me-2"></i>
+                            Registration Opens Mid-December 2025
+                        </div>
+                        
+                        <p class="hero-subtitle" style="font-size: 1.2rem; margin-bottom: 1rem; opacity: 0.9;">Society of Business, Industry, & Economics</p>
+                        <h1 class="hero-title">SOBIE Conference 2026</h1>
+                        <p class="hero-subtitle">26th Annual Academic Conference</p>
+                        
+                        <div class="conference-details mb-4">
+                            <div class="detail-item">
+                                <i class="bi bi-calendar-event me-2"></i>
+                                <strong>April 8-10, 2026</strong><br>
+                                <span class="text-light" style="margin-left: 1.5rem; display: inline-block;">(Wednesday-Friday)</span>
+                            </div>
+                            <div class="detail-item mt-2">
+                                <i class="bi bi-geo-alt-fill me-2"></i>
+                                <strong><a href="https://sandestin.com" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">Sandestin Golf and Beach Resort</a> <i class="bi bi-box-arrow-up-right" style="font-size: 0.8rem; opacity: 0.7; margin-left: 0.3rem;"></i></strong><br>
+                                <span class="text-light" style="margin-left: 1.5rem; display: inline-block;">Miramar Beach, Florida</span>
+                            </div>
+                        </div>
+                        
+                        <div class="cta-buttons">
+                            <button onclick="copyEmail()" class="btn-primary-custom" id="copyEmailBtn">
+                                <i class="bi bi-envelope me-2"></i>
+                                <span id="emailBtnText">Email SOBIE</span>
+                            </button>
+                        </div>
+                        
+                        <!-- Additional Info Buttons -->
+                        <div class="info-buttons mt-3">
+                            <button type="button" class="btn btn-sm btn-outline-light me-2 mb-2" data-bs-toggle="modal" data-bs-target="#aboutModal">
+                                <i class="bi bi-info-circle me-2"></i>About SOBIE
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-light me-2 mb-2" data-bs-toggle="modal" data-bs-target="#jobieModal">
+                                <i class="bi bi-journal-text me-2"></i>JOBIE Journal
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-light me-2 mb-2" data-bs-toggle="modal" data-bs-target="#venueModal">
+                                <i class="bi bi-geo-alt me-2"></i>Venue Details
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-light me-2 mb-2" data-bs-toggle="modal" data-bs-target="#archiveModal">
+                                <i class="bi bi-archive me-2"></i>Past Conferences
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Important Dates Section -->
+    <section class="info-section" style="background: #f8fafc; padding: 4rem 0;" id="updates">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-12">
+                    <h2 class="display-5 fw-bold mb-3">Important Dates 2026</h2>
+                    <p class="lead text-muted">Mark your calendar for these key SOBIE 2026 deadlines</p>
+                </div>
+            </div>
+            
+            <div class="row g-4 justify-content-center">
+                <div class="col-lg-3 col-md-6">
+                    <div class="info-card" style="border-left: 4px solid #dc3545;">
+                        <div class="info-header">
+                            <div class="info-icon" style="background: linear-gradient(135deg, #dc3545 0%, #b02a37 100%);">
+                                <i class="bi bi-calendar-check"></i>
+                            </div>
+                            <h4 class="info-title" style="font-size: clamp(1rem, 2.5vw, 1.2rem); line-height: 1.3; word-wrap: break-word;">Conference Registration</h4>
+                        </div>
+                        <p class="text-muted mb-2"><strong>March 16, 2026</strong> <small>(tentative)</small></p>
+                        <p class="info-description" style="font-size: 0.9rem;">Final deadline for conference registration</p>
+                        <div class="mt-2" style="font-size: 0.85rem;">
+                            <div class="text-success"><strong>Students:</strong> FREE</div>
+                            <div class="text-muted"><strong>General:</strong> $325</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="info-card" style="border-left: 4px solid #f59e0b;">
+                        <div class="info-header">
+                            <div class="info-icon" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                                <i class="bi bi-building"></i>
+                            </div>
+                            <h4 class="info-title" style="font-size: clamp(1rem, 2.5vw, 1.2rem); line-height: 1.3; word-wrap: break-word;">Hotel Reservations</h4>
+                        </div>
+                        <p class="text-muted mb-2"><strong>March 8, 2026</strong> <small>(tentative)</small></p>
+                        <p class="info-description" style="font-size: 0.9rem;">Sandestin group rate deadline</p>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="info-card" style="border-left: 4px solid #10b981;">
+                        <div class="info-header">
+                            <div class="info-icon" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                                <i class="bi bi-file-text"></i>
+                            </div>
+                            <h4 class="info-title" style="font-size: clamp(1rem, 2.5vw, 1.2rem); line-height: 1.3; word-wrap: break-word;">Paper Submission</h4>
+                        </div>
+                        <p class="text-muted mb-2"><strong>April 1, 2026</strong> <small>(tentative)</small></p>
+                        <p class="info-description" style="font-size: 0.9rem;">Research paper submission deadline</p>
+                        <div class="mt-2" style="font-size: 0.85rem;">
+                            <div class="text-primary"><strong>Abstracts, Working Papers, Complete Papers</strong></div>
+                            <div class="text-success"><i class="bi bi-mortarboard me-1"></i>Student research especially welcomed!</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6">
+                    <div class="info-card" style="border-left: 4px solid var(--sobie-primary);">
+                        <div class="info-header">
+                            <div class="info-icon">
+                                <i class="bi bi-star"></i>
+                            </div>
+                            <h4 class="info-title" style="font-size: clamp(1rem, 2.5vw, 1.2rem); line-height: 1.3; word-wrap: break-word;">Conference Dates</h4>
+                        </div>
+                        <p class="text-muted mb-2"><strong>April 8-10, 2026</strong> <small>(tentative)</small></p>
+                        <p class="info-description" style="font-size: 0.9rem;">Main conference at Sandestin Resort</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row mt-5">
+                <div class="col-12 text-center">
+                    <div class="alert alert-info d-inline-block" style="border: none; background: rgba(37, 99, 235, 0.1); border-radius: 15px; padding: 1.5rem 2rem;">
+                        <i class="bi bi-info-circle me-2"></i>
+                        <strong>Registration Opens:</strong> Mid-December 2025 • Hotel booking and paper submission systems coming early 2026
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Info Section -->
+    <section class="info-section">
+        <div class="container">
+            <div class="row text-center mb-5">
+                <div class="col-12">
+                    <h2 class="display-5 fw-bold mb-3">What's Coming</h2>
+                    <p class="lead text-muted">Exciting new features being developed for the SOBIE community</p>
+                </div>
+            </div>
+            
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <div class="info-icon">
+                                <i class="bi bi-journal-text"></i>
+                            </div>
+                            <h3 class="info-title">Research Hub</h3>
+                        </div>
+                        <p class="info-description">
+                            Comprehensive platform for sharing, discovering, and collaborating on educational research projects with advanced search and filtering capabilities.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <div class="info-icon">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                            <h3 class="info-title">Program Management</h3>
+                        </div>
+                        <p class="info-description">
+                            Streamlined conference scheduling, session management, and attendee registration system with real-time updates and notifications.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                    <div class="info-card">
+                        <div class="info-header">
+                            <div class="info-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                            <h3 class="info-title">Community Network</h3>
+                        </div>
+                        <p class="info-description">
+                            Enhanced networking tools connecting educators, researchers, and administrators to foster collaboration and knowledge sharing.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer Section -->
+    <footer class="footer-section">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-md-8 col-lg-6 text-center">
+                    <div class="mb-3">
+                        <img src="sobie-icon.svg" alt="SOBIE Logo" style="width: 40px; height: 40px; filter: brightness(0) invert(1); opacity: 0.7;">
+                    </div>
+                    <p class="mb-2">&copy; 2026 SOBIE Conference. All rights reserved.</p>
+                    <p class="text-muted small mb-0">
+                        New website launching soon.<br>
+                        For immediate inquiries, please contact<br>
+                        <a href="mailto:info@sobieconference.org" class="text-white">info@sobieconference.org</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Smooth scrolling for anchor links -->
+    <script>
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Copy email to clipboard function
+        async function copyEmail() {
+            const email = 'info@sobieconference.org';
+            const btn = document.getElementById('copyEmailBtn');
+            const btnText = document.getElementById('emailBtnText');
+            const originalText = btnText.textContent;
+
+            try {
+                await navigator.clipboard.writeText(email);
+                
+                // Update button to show success
+                btnText.textContent = 'Email Copied!';
+                btn.style.background = '#10b981';
+                
+                // Reset button after 2.5 seconds
+                setTimeout(() => {
+                    btnText.textContent = originalText;
+                    btn.style.background = '';
+                }, 2500);
+                
+            } catch (err) {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = email;
+                textArea.style.position = 'fixed';
+                textArea.style.opacity = '0';
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    btnText.textContent = 'Email Copied!';
+                    btn.style.background = '#10b981';
+                    
+                    setTimeout(() => {
+                        btnText.textContent = originalText;
+                        btn.style.background = '';
+                    }, 2500);
+                } catch (fallbackErr) {
+                    btnText.textContent = 'Copy Failed';
+                    setTimeout(() => {
+                        btnText.textContent = originalText;
+                    }, 2500);
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        }
+    </script>
+
+    <!-- About SOBIE Modal -->
+    <div class="modal fade" id="aboutModal" tabindex="-1" aria-labelledby="aboutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--sobie-gradient); color: white;">
+                    <h5 class="modal-title" id="aboutModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>About SOBIE
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">History</h6>
+                            <p><strong>Founded in 1995</strong>, SOBIE was established with the aim to foster collaboration among students and professionals in the fields of business and economics.</p>
+                            <p>Over the years, SOBIE has hosted numerous events, including seminars, conferences, and workshops that have contributed to the academic and professional growth of its members.</p>
+                            <p>The society's commitment to providing valuable resources and opportunities has made it one of the leading organizations in its field.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Mission</h6>
+                            <p>The SOBIE mission is to encourage business faculty members to respond to current economic and market issues, and find practical solutions to the many problems business people and public policymakers confront.</p>
+                            <p><strong>Research Focus:</strong> SOBIE invites business and economic research, as well as interdisciplinary research.</p>
+                            <p><strong>Who Can Participate:</strong> Faculty, non-academic professionals, business people, doctoral candidates, graduate students, and undergraduate students are all invited to participate.</p>
+                            
+                            <div class="alert alert-success mt-3">
+                                <h6 class="text-success mb-2"><i class="bi bi-mortarboard me-2"></i>Students Welcome!</h6>
+                                <p class="mb-1"><strong>Free Registration:</strong> Students attend SOBIE at no cost</p>
+                                <p class="mb-0"><strong>Student Research:</strong> Undergraduate and graduate student research is especially encouraged and welcomed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JOBIE Journal Modal -->
+    <div class="modal fade" id="jobieModal" tabindex="-1" aria-labelledby="jobieModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--sobie-gradient); color: white;">
+                    <h5 class="modal-title" id="jobieModalLabel">
+                        <i class="bi bi-journal-text me-2"></i>JOBIE Journal
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h4 class="text-primary">Journal of Business, Industry, & Economics</h4>
+                        <p class="lead">SOBIE's Official Academic Journal</p>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">About JOBIE</h6>
+                            <p>SOBIE annually publishes its <strong>peer-reviewed academic journal</strong>, JOBIE (Journal of Business, Industry, & Economics).</p>
+                            <p>The journal is <strong>listed in Cabell's directory</strong>, ensuring academic credibility and recognition.</p>
+                            <p>JOBIE provides a platform for researchers to share their work and contribute to the advancement of business and economic knowledge.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Access Journal</h6>
+                            <p>Visit the Journal of Business, Industry, & Economics online:</p>
+                            <div class="text-center">
+                                <a href="https://www.buildingthepride.com/jobie/" target="_blank" class="btn btn-primary">
+                                    <i class="bi bi-journal-text me-2"></i>Visit JOBIE Journal
+                                    <i class="bi bi-box-arrow-up-right ms-2" style="font-size: 0.8rem;"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Venue Details Modal -->
+    <div class="modal fade" id="venueModal" tabindex="-1" aria-labelledby="venueModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--sobie-gradient); color: white;">
+                    <h5 class="modal-title" id="venueModalLabel">
+                        <i class="bi bi-geo-alt me-2"></i>Venue Details
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Conference Location</h6>
+                            <p><strong>Linkside Conference Center</strong><br>
+                            158 Sandestin Blvd N<br>
+                            Destin, FL 32550</p>
+                            
+                            <p><strong>Resort:</strong> <a href="https://sandestin.com" target="_blank">Sandestin Golf & Beach Resort <i class="bi bi-box-arrow-up-right" style="font-size: 0.8rem;"></i></a><br>
+                            Miramar Beach, Florida</p>
+                            
+                            <p><strong>Transportation:</strong> TRAM services are available for getting around the expansive resort property.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary mb-3">Accommodation Options</h6>
+                            <p><strong>On Resort:</strong> Choose from villas, beachside, lakeside, bayside, or hotel accommodations.</p>
+                            
+                            <p><strong>Recommended:</strong> Bayside at Sandestin is adjacent to the Conference Venue for maximum convenience.</p>
+                            
+                            <p><strong>Resort Features:</strong> The property spans from the beach to the bay, offering diverse experiences and locations.</p>
+                            
+                            <p><strong>Group Rates:</strong> Special SOBIE discount rates will be available for both weekends before and after the conference.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Past Conferences Modal -->
+    <div class="modal fade" id="archiveModal" tabindex="-1" aria-labelledby="archiveModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header" style="background: var(--sobie-gradient); color: white;">
+                    <h5 class="modal-title" id="archiveModalLabel">
+                        <i class="bi bi-archive me-2"></i>Past Conferences
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-4">
+                        <h4 class="text-primary">Conference Archives</h4>
+                        <p class="lead">Three Decades of Academic Excellence</p>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3"><i class="bi bi-calendar-event me-2"></i>Conference Programs</h5>
+                            <div class="list-group mb-4">
+                                <a href="sobie-docs/2025 SOBIE Final Program 04_17.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2025 Program</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                                <a href="sobie-docs/2024 SOBIE program.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2024 Program</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                                <a href="sobie-docs/2023 Final Program 04_10_2023.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2023 Program</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                                <a href="sobie-docs/Posted Final 2022-SOBIE program.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2022 Program</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                                <a href="sobie-docs/2019-SOBIE program.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2019 Program</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <h5 class="text-primary mb-3"><i class="bi bi-journal-text me-2"></i>Conference Proceedings</h5>
+                            <div class="list-group mb-4">
+                                <a href="sobie-docs/SOBIE 2025 Proceedings.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2025 Proceedings</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                                <a href="sobie-docs/SOBIE 2024 Proceedings.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2024 Proceedings</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                                <a href="sobie-docs/SOBIE 2023 Proceedings_Final.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2023 Proceedings</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                                <a href="sobie-docs/SOBIE 2022 Proceedings_Final.pdf" target="_blank" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                    <span><i class="bi bi-file-pdf text-danger me-2"></i>SOBIE 2022 Proceedings</span>
+                                    <i class="bi bi-box-arrow-up-right text-muted"></i>
+                                </a>
+                            </div>
+                            
+                            <div class="alert alert-light">
+                                <h6 class="text-primary mb-2"><i class="bi bi-info-circle me-2"></i>About the Archives</h6>
+                                <p class="mb-1 small"><strong>Programs:</strong> Conference schedules, sessions, and presenters</p>
+                                <p class="mb-0 small"><strong>Proceedings:</strong> Published research papers and abstracts</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <p class="text-muted">Since 1995, SOBIE has been fostering academic collaboration and professional growth in business and economics.</p>
+                        <p class="small text-muted">Additional historical documents may be available upon request.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
